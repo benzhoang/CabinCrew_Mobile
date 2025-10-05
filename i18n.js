@@ -32,6 +32,9 @@ const dictionaries = {
         logging_in: 'Đang đăng nhập...',
         no_account: 'Chưa có tài khoản?',
         signup_now: 'Đăng ký ngay',
+        login: 'Đăng nhập',
+        error: 'Lỗi',
+        error_fill_fields: 'Vui lòng nhập đầy đủ thông tin',
 
         // Signup
         signup_title: 'Đăng ký',
@@ -50,6 +53,22 @@ const dictionaries = {
         otp_verifying: 'Đang xác thực...',
         otp_confirm: 'Xác nhận',
         otp_skip: 'Bỏ qua, đăng nhập sau',
+
+        // Home
+        home_title: 'Trang chủ',
+        campaign: 'Chiến dịch',
+        applications: 'Ứng tuyển',
+        interviews: 'Phỏng vấn',
+        scoring: 'Chấm điểm',
+        welcome_back: 'Chào mừng bạn trở lại',
+        dashboard: 'Bảng điều khiển',
+
+        // Campaign Screen
+        campaigns: 'Chiến dịch',
+        all_campaigns: 'Tất cả',
+        active_campaigns: 'Hoạt động',
+        warning_campaigns: 'Cảnh báo',
+        inactive_campaigns: 'Không hoạt động',
     },
     en: {
         // MainScreen
@@ -77,6 +96,9 @@ const dictionaries = {
         logging_in: 'Signing in...',
         no_account: "Don't have an account?",
         signup_now: 'Sign up now',
+        login: 'Login',
+        error: 'Error',
+        error_fill_fields: 'Please fill in all fields',
 
         // Signup
         signup_title: 'Sign up',
@@ -95,6 +117,22 @@ const dictionaries = {
         otp_verifying: 'Verifying...',
         otp_confirm: 'Confirm',
         otp_skip: 'Skip, sign in later',
+
+        // Home
+        home_title: 'Home',
+        campaign: 'Campaign',
+        applications: 'Applications',
+        interviews: 'Interviews',
+        scoring: 'Scoring',
+        welcome_back: 'Welcome back',
+        dashboard: 'Dashboard',
+
+        // Campaign Screen
+        campaigns: 'Campaigns',
+        all_campaigns: 'All',
+        active_campaigns: 'Active',
+        warning_campaigns: 'Warning',
+        inactive_campaigns: 'Inactive',
     },
 };
 

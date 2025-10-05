@@ -12,58 +12,21 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { useTranslation } from '../i18n';
 
-export default function Signin({ onBackPress, onSignUpPress, onSignInSuccess, currentLang = 'vi' }) {
+export default function Signin({ onBackPress, onSignInSuccess, currentLang = 'vi' }) {
+    const { t, lang } = useTranslation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Dictionary cho đa ngôn ngữ
-    const dictionaries = {
-        vi: {
-            signin_title: 'Đăng nhập',
-            signin_subtitle: 'Chào mừng bạn quay trở lại',
-            username_label: 'Tên đăng nhập',
-            username_placeholder: 'Nhập tên đăng nhập',
-            password_label: 'Mật khẩu',
-            password_placeholder: 'Nhập mật khẩu',
-            remember_me: 'Ghi nhớ đăng nhập',
-            forgot_password: 'Quên mật khẩu?',
-            or: 'Hoặc',
-            login_with_google: 'Đăng nhập với Google',
-            logging_in: 'Đang đăng nhập...',
-            no_account: 'Chưa có tài khoản?',
-            signup_now: 'Đăng ký ngay',
-        },
-        en: {
-            signin_title: 'Sign in',
-            signin_subtitle: 'Welcome back',
-            username_label: 'Username',
-            username_placeholder: 'Enter your username',
-            password_label: 'Password',
-            password_placeholder: 'Enter your password',
-            remember_me: 'Remember me',
-            forgot_password: 'Forgot password?',
-            or: 'Or',
-            login_with_google: 'Sign in with Google',
-            logging_in: 'Signing in...',
-            no_account: "Don't have an account?",
-            signup_now: 'Sign up now',
-        },
-    };
-
-    const t = (key) => {
-        const dict = dictionaries[currentLang] || dictionaries.vi;
-        return dict[key] || key;
-    };
-
     const handleSignIn = async () => {
         if (!username.trim() || !password.trim()) {
             Alert.alert(
-                currentLang === 'vi' ? 'Lỗi' : 'Error',
-                currentLang === 'vi' ? 'Vui lòng nhập đầy đủ thông tin' : 'Please fill in all fields'
+                t('error'),
+                t('error_fill_fields')
             );
             return;
         }
@@ -80,19 +43,6 @@ export default function Signin({ onBackPress, onSignUpPress, onSignInSuccess, cu
         }, 1500);
     };
 
-    const handleGoogleSignIn = () => {
-        Alert.alert(
-            currentLang === 'vi' ? 'Google Đăng nhập' : 'Google Sign In',
-            currentLang === 'vi' ? 'Chức năng đăng nhập Google sẽ được triển khai' : 'Google sign in feature will be implemented'
-        );
-    };
-
-    const handleForgotPassword = () => {
-        Alert.alert(
-            currentLang === 'vi' ? 'Quên mật khẩu' : 'Forgot Password',
-            currentLang === 'vi' ? 'Chức năng quên mật khẩu sẽ được triển khai' : 'Forgot password feature will be implemented'
-        );
-    };
 
     return (
         <SafeAreaView style={styles.safe}>
@@ -158,7 +108,7 @@ export default function Signin({ onBackPress, onSignUpPress, onSignInSuccess, cu
                             </View>
                         </View>
 
-                        {/* Remember Me & Forgot Password */}
+                        {/* Remember Me */}
                         <View style={styles.optionsContainer}>
                             <TouchableOpacity
                                 style={styles.rememberContainer}
@@ -169,10 +119,6 @@ export default function Signin({ onBackPress, onSignUpPress, onSignInSuccess, cu
                                 </View>
                                 <Text style={styles.rememberText}>{t('remember_me')}</Text>
                             </TouchableOpacity>
-
-                            <TouchableOpacity onPress={handleForgotPassword}>
-                                <Text style={styles.forgotText}>{t('forgot_password')}</Text>
-                            </TouchableOpacity>
                         </View>
 
                         {/* Sign In Button */}
@@ -182,34 +128,11 @@ export default function Signin({ onBackPress, onSignUpPress, onSignInSuccess, cu
                             disabled={isLoading}
                         >
                             <Text style={styles.signInButtonText}>
-                                {isLoading ? t('logging_in') : t('signin')}
+                                {isLoading ? t('logging_in') : t('login')}
                             </Text>
                         </TouchableOpacity>
 
-                        {/* Divider */}
-                        <View style={styles.dividerContainer}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>{t('or')}</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
 
-                        {/* Google Sign In Button */}
-                        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
-                            <View style={styles.googleButtonContent}>
-                                <View style={styles.googleIcon}>
-                                    <Text style={styles.googleIconText}>G</Text>
-                                </View>
-                                <Text style={styles.googleButtonText}>{t('login_with_google')}</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Sign Up Link */}
-                        <View style={styles.signUpContainer}>
-                            <Text style={styles.signUpText}>{t('no_account')} </Text>
-                            <TouchableOpacity onPress={onSignUpPress}>
-                                <Text style={styles.signUpLink}>{t('signup_now')}</Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
 
                     {/* Footer Cloud */}
@@ -337,7 +260,7 @@ const styles = StyleSheet.create({
     },
     optionsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         marginBottom: 30,
     },
@@ -367,11 +290,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: AIR_DARK,
     },
-    forgotText: {
-        fontSize: 14,
-        color: AIR_BLUE,
-        fontWeight: '600',
-    },
     signInButton: {
         backgroundColor: AIR_BLUE,
         borderRadius: 12,
@@ -391,69 +309,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '700',
-    },
-    dividerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#E2E8F0',
-    },
-    dividerText: {
-        marginHorizontal: 16,
-        fontSize: 14,
-        color: '#64748B',
-    },
-    googleButton: {
-        borderWidth: 2,
-        borderColor: '#E2E8F0',
-        borderRadius: 12,
-        paddingVertical: 16,
-        marginBottom: 30,
-        backgroundColor: 'white',
-    },
-    googleButtonContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    googleIcon: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#4285F4',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    googleIconText: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: 'bold',
-        fontFamily: 'Arial',
-    },
-    googleButtonText: {
-        color: AIR_DARK,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    signUpContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    signUpText: {
-        fontSize: 14,
-        color: '#64748B',
-    },
-    signUpLink: {
-        fontSize: 14,
-        color: AIR_BLUE,
-        fontWeight: '600',
     },
     footerCloud: {
         width: '100%',

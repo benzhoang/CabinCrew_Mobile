@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { useTranslation } from '../i18n';
 
-export default function MainScreen({ onSignInPress, onSignUpPress, currentLang, onLanguageChange }) {
+export default function MainScreen({ onSignInPress, currentLang, onLanguageChange }) {
     const { t, lang, changeLanguage } = useTranslation();
 
     const toggleLanguage = () => {
@@ -45,14 +45,6 @@ export default function MainScreen({ onSignInPress, onSignUpPress, currentLang, 
                         onPress={onSignInPress}
                     >
                         <Text style={styles.primaryButtonText}>{t('signin')}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.button, styles.secondaryButton]}
-                        activeOpacity={0.85}
-                        onPress={onSignUpPress}
-                    >
-                        <Text style={styles.secondaryButtonText}>{t('signup')}</Text>
                     </TouchableOpacity>
                 </View>
 
