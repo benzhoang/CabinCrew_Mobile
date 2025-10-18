@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { useTranslation } from '../i18n';
 
-export default function CampaignScreen({ onSignOutPress, onBackPress }) {
+export default function CampaignScreen({ onSignOutPress, onBackPress, navigation }) {
     const { t, lang } = useTranslation();
-    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [selectedStatus, setSelectedStatus] = useState('active');
 
     // Dữ liệu campaign từ CabinCrew web app
     const campaigns = [
@@ -28,7 +28,37 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             targetHires: 20,
             currentHires: 8,
             description: 'Tuyển dụng tiếp viên hàng không cho các chuyến bay nội địa và quốc tế',
-            requirements: 'Tiếng Anh tốt, Chiều cao 1.60m+, Kỹ năng giao tiếp, Sức khỏe tốt'
+            requirements: 'Tiếng Anh tốt, Chiều cao 1.60m+, Kỹ năng giao tiếp, Sức khỏe tốt',
+            batches: [
+                {
+                    id: 1,
+                    name: 'Đợt 1',
+                    status: 'Đang diễn ra',
+                    startDate: '1/10/2024',
+                    endDate: '15/10/2024',
+                    location: 'Hà Nội',
+                    format: 'Trực tiếp',
+                    manager: 'Nguyễn Thanh Tùng',
+                    targetHires: 10,
+                    currentHires: 7,
+                    progress: 70,
+                    notes: 'Phỏng vấn vòng 1'
+                },
+                {
+                    id: 2,
+                    name: 'Đợt 2',
+                    status: 'Sắp diễn ra',
+                    startDate: '1/11/2024',
+                    endDate: '15/11/2024',
+                    location: 'TP.HCM',
+                    format: 'Trực tiếp',
+                    manager: 'Trần Bảo Vy',
+                    targetHires: 10,
+                    currentHires: 0,
+                    progress: 0,
+                    notes: 'Phỏng vấn vòng 2'
+                }
+            ]
         },
         {
             id: 2,
@@ -41,7 +71,23 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             targetHires: 5,
             currentHires: 5,
             description: 'Tuyển dụng và đào tạo phi công cho đội bay mới',
-            requirements: 'Bằng lái máy bay, Kinh nghiệm bay, Tiếng Anh thành thạo'
+            requirements: 'Bằng lái máy bay, Kinh nghiệm bay, Tiếng Anh thành thạo',
+            batches: [
+                {
+                    id: 3,
+                    name: 'Đợt 1',
+                    status: 'Hoàn thành',
+                    startDate: '1/1/2024',
+                    endDate: '28/2/2024',
+                    location: 'Hà Nội',
+                    format: 'Trực tiếp',
+                    manager: 'Phạm Văn Đức',
+                    targetHires: 5,
+                    currentHires: 5,
+                    progress: 100,
+                    notes: 'Đào tạo phi công'
+                }
+            ]
         },
         {
             id: 3,
@@ -54,7 +100,23 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             targetHires: 15,
             currentHires: 6,
             description: 'Tuyển dụng nhân viên mặt đất cho sân bay',
-            requirements: 'Kỹ năng xử lý hành lý, Giao tiếp tốt, Làm việc ca'
+            requirements: 'Kỹ năng xử lý hành lý, Giao tiếp tốt, Làm việc ca',
+            batches: [
+                {
+                    id: 4,
+                    name: 'Đợt 1',
+                    status: 'Tạm dừng',
+                    startDate: '1/2/2024',
+                    endDate: '30/4/2024',
+                    location: 'TP.HCM',
+                    format: 'Trực tiếp',
+                    manager: 'Lê Thị Hoa',
+                    targetHires: 15,
+                    currentHires: 6,
+                    progress: 40,
+                    notes: 'Tạm dừng do thiếu ngân sách'
+                }
+            ]
         },
         {
             id: 4,
@@ -67,7 +129,23 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             targetHires: 12,
             currentHires: 4,
             description: 'Mở rộng đội ngũ chăm sóc khách hàng',
-            requirements: 'Kỹ năng giao tiếp, Tiếng Anh, Xử lý tình huống'
+            requirements: 'Kỹ năng giao tiếp, Tiếng Anh, Xử lý tình huống',
+            batches: [
+                {
+                    id: 5,
+                    name: 'Đợt 1',
+                    status: 'Đang diễn ra',
+                    startDate: '15/2/2024',
+                    endDate: '15/5/2024',
+                    location: 'Hà Nội',
+                    format: 'Trực tiếp',
+                    manager: 'Vũ Minh Tuấn',
+                    targetHires: 12,
+                    currentHires: 4,
+                    progress: 33,
+                    notes: 'Tuyển dụng nhân viên chăm sóc khách hàng'
+                }
+            ]
         },
         {
             id: 5,
@@ -80,12 +158,27 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             targetHires: 8,
             currentHires: 2,
             description: 'Tuyển dụng kỹ thuật viên bảo trì máy bay',
-            requirements: 'Bằng kỹ thuật, Kinh nghiệm bảo trì, An toàn lao động'
+            requirements: 'Bằng kỹ thuật, Kinh nghiệm bảo trì, An toàn lao động',
+            batches: [
+                {
+                    id: 6,
+                    name: 'Đợt 1',
+                    status: 'Đang diễn ra',
+                    startDate: '1/3/2024',
+                    endDate: '30/6/2024',
+                    location: 'TP.HCM',
+                    format: 'Trực tiếp',
+                    manager: 'Hoàng Văn Nam',
+                    targetHires: 8,
+                    currentHires: 2,
+                    progress: 25,
+                    notes: 'Tuyển dụng kỹ thuật viên bảo trì'
+                }
+            ]
         }
     ];
 
     const statusFilters = [
-        { key: 'all', label: 'Tất cả', color: '#6B7280' },
         { key: 'active', label: 'Đang hoạt động', color: '#059669' },
         { key: 'completed', label: 'Hoàn thành', color: '#3B82F6' },
         { key: 'paused', label: 'Tạm dừng', color: '#D97706' },
@@ -117,16 +210,24 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
         }
     };
 
-    const filteredCampaigns = selectedStatus === 'all'
-        ? campaigns
-        : campaigns.filter(campaign => campaign.status === selectedStatus);
+    const filteredCampaigns = campaigns.filter(campaign => campaign.status === selectedStatus);
 
     const getProgressPercentage = (current, target) => {
         return Math.round((current / target) * 100);
     };
 
+    const handleCampaignPress = (campaign) => {
+        if (navigation) {
+            navigation.navigate('BatchScreen', { campaignData: campaign });
+        }
+    };
+
     const renderCampaignCard = ({ item }) => (
-        <View style={styles.campaignCard}>
+        <TouchableOpacity
+            style={styles.campaignCard}
+            onPress={() => handleCampaignPress(item)}
+            activeOpacity={0.7}
+        >
             <View style={styles.cardHeader}>
                 <View style={styles.statusContainer}>
                     <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
@@ -168,7 +269,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress }) {
             </View>
 
             <Text style={styles.descriptionText}>{item.description}</Text>
-        </View>
+        </TouchableOpacity>
     );
 
     return (

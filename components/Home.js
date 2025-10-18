@@ -10,7 +10,7 @@ import {
 import { useTranslation } from '../i18n';
 import CampaignScreen from '../screens/CampaignScreen';
 
-export default function Home({ onSignOutPress }) {
+export default function Home({ onSignOutPress, navigation }) {
     const { t, lang } = useTranslation();
     const [activeTab, setActiveTab] = useState('campaign');
 
@@ -24,7 +24,7 @@ export default function Home({ onSignOutPress }) {
     const renderContent = () => {
         switch (activeTab) {
             case 'campaign':
-                return <CampaignScreen onSignOutPress={onSignOutPress} />;
+                return <CampaignScreen onSignOutPress={onSignOutPress} navigation={navigation} />;
             case 'applications':
                 return (
                     <View style={styles.contentContainer}>
@@ -91,7 +91,7 @@ export default function Home({ onSignOutPress }) {
             {/* Content Area - CampaignScreen là màn hình chính */}
             <View style={styles.content}>
                 {activeTab === 'campaign' ? (
-                    <CampaignScreen onSignOutPress={onSignOutPress} />
+                    <CampaignScreen onSignOutPress={onSignOutPress} navigation={navigation} />
                 ) : (
                     renderContent()
                 )}
