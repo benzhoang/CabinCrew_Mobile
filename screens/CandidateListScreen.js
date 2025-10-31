@@ -201,14 +201,16 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 <Text style={styles.notesText}>{item.notes}</Text>
             </View>
 
-            <View style={styles.actionButtons}>
-                <TouchableOpacity
-                    style={[styles.actionButton, styles.detailButton]}
-                    onPress={() => handleCandidatePress(item)}
-                >
-                    <Text style={styles.detailButtonText}> Đánh giá ngoại hình</Text>
-                </TouchableOpacity>
-            </View>
+            {item.status === 'pending' && (
+                <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.detailButton]}
+                        onPress={() => handleCandidatePress(item)}
+                    >
+                        <Text style={styles.detailButtonText}>Chấm điểm ngoại hình</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </TouchableOpacity>
     );
 

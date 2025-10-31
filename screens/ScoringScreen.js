@@ -8,9 +8,14 @@ import {
     ScrollView,
     Alert,
 } from 'react-native';
+import FeedbackModal from '../components/FeedbackModal';
 
 export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmit }) {
+    // selectedCriteria: key -> 'pass' | 'fail'
     const [selectedCriteria, setSelectedCriteria] = useState({});
+    // Bỏ trạng thái mở rộng: luôn hiển thị nút hành động
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [feedbackText, setFeedbackText] = useState('');
 
     // Các tiêu chí chấm điểm dựa trên hình ảnh
     const scoringCriteria = {
@@ -20,32 +25,62 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                 {
                     id: 'bmi',
                     text: 'Cân đối, đảm bảo nằm trong chỉ số BMI quy định',
-                    english: 'Well-proportioned, to be qualified within the prescribed BMI'
+                    english: 'Well-proportioned, to be qualified within the prescribed BMI',
+                    details: [
+                        'Chiều cao, cân nặng đạt chuẩn theo bảng BMI của hãng',
+                        'Không thiếu cân/quá cân so với ngưỡng quy định',
+                        'Vóc dáng cân đối tổng thể'
+                    ]
                 },
                 {
                     id: 'gait',
                     text: 'Dáng đi cân đối, không lệch hay rung lắc',
-                    english: 'Well-proportioned gait, no deviation or shaking when walking'
+                    english: 'Well-proportioned gait, no deviation or shaking when walking',
+                    details: [
+                        'Bước đi thẳng, không khập khiễng',
+                        'Không lắc vai/hông quá mức',
+                        'Tư thế tự tin, vững vàng'
+                    ]
                 },
                 {
                     id: 'arms',
                     text: 'Cánh tay, bàn tay thẳng, cân đối không bị co rút hay dị dạng',
-                    english: 'Arms, hands straight, balanced without shrinkage or deformity'
+                    english: 'Arms, hands straight, balanced without shrinkage or deformity',
+                    details: [
+                        'Cánh tay, bàn tay không dị tật',
+                        'Không co rút, không biến dạng',
+                        'Cử động linh hoạt'
+                    ]
                 },
                 {
                     id: 'legs',
                     text: 'Chân thẳng, không cong vẹo hay bên cao bên thấp',
-                    english: 'Legs are straight, no curvature or one long & one short leg'
+                    english: 'Legs are straight, no curvature or one long & one short leg',
+                    details: [
+                        'Hai chân dài tương đương',
+                        'Không vòng kiềng, không chữ X',
+                        'Khả năng đứng/di chuyển ổn định'
+                    ]
                 },
                 {
                     id: 'shoulders',
                     text: 'Hai bên vai cân đối, không vẹo hay lệch',
-                    english: 'The shoulders are balanced, not twisted or skewed'
+                    english: 'The shoulders are balanced, not twisted or skewed',
+                    details: [
+                        'Độ cao hai vai tương xứng',
+                        'Không lệch vai rõ rệt',
+                        'Tư thế thẳng, không gù'
+                    ]
                 },
                 {
                     id: 'tattoos',
                     text: 'Không có hình xăm, sẹo hay chàm tại khu vực bên ngoài đồng phục',
-                    english: 'No tattoos, scars or birthmarks in areas outside the uniform'
+                    english: 'No tattoos, scars or birthmarks in areas outside the uniform',
+                    details: [
+                        'Không xăm lộ ra ngoài khi mặc đồng phục',
+                        'Không sẹo lồi lớn, chàm lớn vùng hở',
+                        'Không vết thẩm mỹ gây mất thẩm mỹ'
+                    ]
                 }
             ]
         },
@@ -55,7 +90,12 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                 {
                     id: 'hair',
                     text: 'Tóc mọc đều',
-                    english: 'Hair grows evenly'
+                    english: 'Hair grows evenly',
+                    details: [
+                        'Không hói, không mảng thưa rõ rệt',
+                        'Màu tóc phù hợp quy định',
+                        'Tóc sạch sẽ, gọn gàng'
+                    ]
                 }
             ]
         },
@@ -65,37 +105,63 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                 {
                     id: 'face_balance',
                     text: 'Gương mặt cân đối, 2 tai cân đối và hàm răng đều đặn, không hô, móm, răng nhấp nhô hoặc màu răng quá xỉn',
-                    english: 'Balanced face, 2 ears balance and regular teeth, overbite, underbite, uneven teeth or too dull tooth color'
+                    english: 'Balanced face, 2 ears balance and regular teeth, overbite, underbite, uneven teeth or too dull tooth color',
+                    details: [
+                        'Tỉ lệ khuôn mặt hài hòa',
+                        'Tai cân đối hai bên',
+                        'Răng đều, không hô/móm mạnh, màu răng phù hợp'
+                    ]
                 },
                 {
                     id: 'eyes',
                     text: 'Mắt cân đối, không cận quá 3 độ, không lé, màu mắt 2 bên đồng đều',
-                    english: 'Balanced eyes, short-signed but not more than 3 degrees, no squint, eye color on both sides evenly'
+                    english: 'Balanced eyes, short-signed but not more than 3 degrees, no squint, eye color on both sides evenly',
+                    details: [
+                        'Không lé, không lác',
+                        'Cận không quá 3 độ (nếu có)',
+                        'Màu mắt đồng đều hai bên'
+                    ]
                 },
                 {
                     id: 'jaw',
                     text: 'Hàm không lệch, không móm',
-                    english: 'Jaw bone is not misaligned, must be in shape'
+                    english: 'Jaw bone is not misaligned, must be in shape',
+                    details: [
+                        'Không lệch khớp hàm',
+                        'Không móm/hô nặng',
+                        'Đường nét hàm hài hòa'
+                    ]
                 }
             ]
         }
     };
 
-    const toggleCriterion = (category, criterionId) => {
-        const key = `${category}_${criterionId}`;
+    const keyOf = (category, criterionId) => `${category}_${criterionId}`;
+
+    // Không cần toggle mở rộng nữa
+
+    const setCriterionStatus = (category, criterionId, status) => {
+        const key = keyOf(category, criterionId);
         setSelectedCriteria(prev => ({
             ...prev,
-            [key]: !prev[key]
+            [key]: status
         }));
     };
 
     const isCriterionSelected = (category, criterionId) => {
-        const key = `${category}_${criterionId}`;
-        return selectedCriteria[key] || false;
+        const key = keyOf(category, criterionId);
+        return selectedCriteria[key] === 'pass' || selectedCriteria[key] === 'fail';
     };
 
+    const getCriterionStatus = (category, criterionId) => {
+        const key = keyOf(category, criterionId);
+        return selectedCriteria[key];
+    };
+
+    // Không dùng expanded nữa
+
     const getTotalSelectedCriteria = () => {
-        return Object.values(selectedCriteria).filter(Boolean).length;
+        return Object.values(selectedCriteria).filter(v => v === 'pass' || v === 'fail').length;
     };
 
     const getTotalCriteria = () => {
@@ -107,65 +173,104 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     };
 
     const canSubmit = () => {
-        return getTotalSelectedCriteria() > 0;
+        return getTotalSelectedCriteria() === getTotalCriteria();
     };
 
     const handleSubmitResult = () => {
         if (!canSubmit()) {
-            Alert.alert('Thông báo', 'Vui lòng chọn ít nhất một tiêu chí trước khi gửi kết quả');
+            Alert.alert('Thông báo', 'Vui lòng chấm hết tất cả tiêu chí trước khi gửi kết quả');
             return;
         }
-
-        Alert.alert(
-            'Xác nhận gửi kết quả',
-            `Bạn có chắc chắn muốn gửi kết quả chấm điểm cho ứng viên ${candidateData?.name}?`,
-            [
-                { text: 'Hủy', style: 'cancel' },
-                {
-                    text: 'Gửi kết quả',
-                    onPress: () => {
-                        onScoreSubmit(candidateData, 'submitted', selectedCriteria);
-                    }
-                }
-            ]
-        );
+        setShowFeedbackModal(true);
     };
 
-    const renderCriterionItem = (category, item) => (
-        <TouchableOpacity
-            key={item.id}
-            style={[
-                styles.criterionItem,
-                isCriterionSelected(category, item.id) && styles.selectedCriterionItem
-            ]}
-            onPress={() => toggleCriterion(category, item.id)}
-            activeOpacity={0.7}
-        >
-            <View style={styles.criterionContent}>
-                <View style={styles.checkboxContainer}>
-                    <View style={[
-                        styles.checkbox,
-                        isCriterionSelected(category, item.id) && styles.checkedCheckbox
-                    ]}>
-                        {isCriterionSelected(category, item.id) && (
-                            <Text style={styles.checkmark}>✓</Text>
+    const handleConfirmSubmit = (text) => {
+        setFeedbackText(text || '');
+        setShowFeedbackModal(false);
+        onScoreSubmit?.(candidateData, 'submitted', selectedCriteria, text || '');
+    };
+
+    const renderCriterionItem = (category, item) => {
+        const status = getCriterionStatus(category, item.id);
+        const selected = isCriterionSelected(category, item.id);
+        return (
+            <View
+                key={item.id}
+                style={[
+                    styles.criterionItem,
+                    selected && styles.selectedCriterionItem,
+                    status === 'pass' && styles.passedCriterionItem,
+                    status === 'fail' && styles.failedCriterionItem
+                ]}
+            >
+                <View style={styles.criterionContent}>
+                    <View style={styles.checkboxContainer}>
+                        <View style={[
+                            styles.checkbox,
+                            status === 'pass' && styles.checkedCheckboxPass,
+                            status === 'fail' && styles.checkedCheckboxFail
+                        ]}>
+                            {status === 'pass' && (
+                                <Text style={styles.checkmark}>✓</Text>
+                            )}
+                            {status === 'fail' && (
+                                <Text style={styles.crossmark}>✕</Text>
+                            )}
+                        </View>
+                    </View>
+                    <View style={styles.criterionTextContainer}>
+                        <Text style={[
+                            styles.criterionText,
+                            selected && styles.selectedCriterionText
+                        ]}>
+                            {item.text}
+                        </Text>
+                        <Text style={styles.criterionEnglish}>
+                            {item.english}
+                        </Text>
+                        {item.details && item.details.length > 0 && (
+                            <View style={styles.detailsList}>
+                                {item.details.map((d, idx) => (
+                                    <Text key={idx} style={styles.detailItem}>• {d}</Text>
+                                ))}
+                            </View>
                         )}
+
+                        <View style={styles.criterionActions}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.statusButton,
+                                    styles.passButton,
+                                    status === 'pass' && styles.activePassButton
+                                ]}
+                                onPress={() => setCriterionStatus(category, item.id, 'pass')}
+                            >
+                                <Text style={[
+                                    styles.statusButtonText,
+                                    styles.passButtonText,
+                                    status === 'pass' && styles.activePassButtonText
+                                ]}>Đạt</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.statusButton,
+                                    styles.failButton,
+                                    status === 'fail' && styles.activeFailButton
+                                ]}
+                                onPress={() => setCriterionStatus(category, item.id, 'fail')}
+                            >
+                                <Text style={[
+                                    styles.statusButtonText,
+                                    styles.failButtonText,
+                                    status === 'fail' && styles.activeFailButtonText
+                                ]}>Không đạt</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-                <View style={styles.criterionTextContainer}>
-                    <Text style={[
-                        styles.criterionText,
-                        isCriterionSelected(category, item.id) && styles.selectedCriterionText
-                    ]}>
-                        {item.text}
-                    </Text>
-                    <Text style={styles.criterionEnglish}>
-                        {item.english}
-                    </Text>
-                </View>
             </View>
-        </TouchableOpacity>
-    );
+        );
+    };
 
     const renderCategory = (categoryKey, category) => (
         <View key={categoryKey} style={styles.categoryContainer}>
@@ -231,6 +336,13 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                     </Text>
                 </TouchableOpacity>
             </View>
+
+            <FeedbackModal
+                visible={showFeedbackModal}
+                onClose={() => setShowFeedbackModal(false)}
+                onSubmit={handleConfirmSubmit}
+                initialText={feedbackText}
+            />
         </SafeAreaView>
     );
 }
@@ -350,6 +462,18 @@ const styles = StyleSheet.create({
         shadowColor: AIR_BLUE,
         shadowOpacity: 0.1,
     },
+    passedCriterionItem: {
+        borderColor: AIR_GREEN,
+        backgroundColor: '#ECFDF5',
+        shadowColor: AIR_GREEN,
+        shadowOpacity: 0.08,
+    },
+    failedCriterionItem: {
+        borderColor: AIR_RED,
+        backgroundColor: '#FEF2F2',
+        shadowColor: AIR_RED,
+        shadowOpacity: 0.08,
+    },
     criterionContent: {
         flexDirection: 'row',
         alignItems: 'flex-start',
@@ -372,7 +496,20 @@ const styles = StyleSheet.create({
         backgroundColor: AIR_BLUE,
         borderColor: AIR_BLUE,
     },
+    checkedCheckboxPass: {
+        backgroundColor: AIR_GREEN,
+        borderColor: AIR_GREEN,
+    },
+    checkedCheckboxFail: {
+        backgroundColor: AIR_RED,
+        borderColor: AIR_RED,
+    },
     checkmark: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    crossmark: {
         color: 'white',
         fontSize: 12,
         fontWeight: 'bold',
@@ -396,6 +533,59 @@ const styles = StyleSheet.create({
         color: '#6B7280',
         fontStyle: 'italic',
         lineHeight: 16,
+    },
+    detailsList: {
+        marginTop: 8,
+        marginBottom: 8,
+        gap: 4,
+    },
+    detailItem: {
+        fontSize: 12,
+        color: '#4B5563',
+        lineHeight: 16,
+    },
+    criterionActions: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 12,
+    },
+    statusButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statusButtonText: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    passButton: {
+        borderColor: AIR_GREEN,
+        backgroundColor: 'white',
+    },
+    failButton: {
+        borderColor: AIR_RED,
+        backgroundColor: 'white',
+    },
+    passButtonText: {
+        color: AIR_GREEN,
+    },
+    failButtonText: {
+        color: AIR_RED,
+    },
+    activePassButton: {
+        backgroundColor: AIR_GREEN,
+    },
+    activeFailButton: {
+        backgroundColor: AIR_RED,
+    },
+    activePassButtonText: {
+        color: 'white',
+    },
+    activeFailButtonText: {
+        color: 'white',
     },
     actionContainer: {
         paddingHorizontal: 20,

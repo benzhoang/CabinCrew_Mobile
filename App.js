@@ -67,7 +67,7 @@ export default function App() {
     // Ở đây có thể thêm logic lưu điểm số vào database
     Alert.alert(
       'Thành công',
-      `Đã ${decision === 'approved' ? 'duyệt' : 'từ chối'} ứng viên ${candidate.name}`,
+      'Đã gửi kết quả',
       [{ text: 'OK', onPress: () => setCurrentScreen('candidateList') }]
     );
   };
