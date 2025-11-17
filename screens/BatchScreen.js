@@ -14,8 +14,11 @@ import { useTranslation } from '../i18n';
 export default function BatchScreen({ campaignData, onBackPress, navigation }) {
     const { t, lang } = useTranslation();
 
+    console.log('BatchScreen received campaignData:', campaignData);
+
     // Dữ liệu đợt tuyển dụng cho campaign được chọn
-    const batches = campaignData?.batches || [
+    // Sử dụng data giả nếu không có batches hoặc batches là mảng rỗng
+    const defaultBatches = [
         {
             id: 1,
             name: 'Đợt 1',
@@ -46,6 +49,11 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
         }
     ];
 
+    // Kiểm tra nếu có batches từ API và không phải mảng rỗng
+    const batches = (campaignData?.batches && Array.isArray(campaignData.batches) && campaignData.batches.length > 0)
+        ? campaignData.batches
+        : defaultBatches;
+
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -65,7 +73,16 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
 
 
     const getProgressPercentage = (current, target) => {
-        return Math.round((current / target) * 100);
+        // Xử lý các trường hợp edge case để tránh NaN
+        const currentNum = Number(current) || 0;
+        const targetNum = Number(target) || 0;
+
+        if (targetNum === 0 || isNaN(targetNum) || isNaN(currentNum)) {
+            return 0;
+        }
+
+        const percentage = Math.round((currentNum / targetNum) * 100);
+        return isNaN(percentage) ? 0 : Math.max(0, Math.min(100, percentage)); // Đảm bảo trong khoảng 0-100
     };
 
     const handleBatchPress = (batch) => {
@@ -131,11 +148,11 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                         <View
                             style={[
                                 styles.batchProgressFill,
-                                { width: `${item.progress}%` }
+                                { width: `${getProgressPercentage(item.currentHires, item.targetHires)}%` }
                             ]}
                         />
                     </View>
-                    <Text style={styles.batchProgressText}>{item.progress}%</Text>
+                    <Text style={styles.batchProgressText}>{getProgressPercentage(item.currentHires, item.targetHires)}%</Text>
                 </View>
             </View>
 

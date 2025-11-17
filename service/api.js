@@ -79,3 +79,103 @@ export const removeToken = async () => {
     }
 };
 
+// API lấy danh sách campaigns được giao cho examiner
+export const getMyCampaigns = async () => {
+    try {
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const response = await fetch(`${API_BASE_URL}/users/my-campaigns`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        // Kiểm tra code === 0 (success) theo format API
+        if (data.code === 0 && data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        } else {
+            const errorMessage =
+                data.errorMessage ||
+                data.message ||
+                "Không thể lấy danh sách chiến dịch";
+            return {
+                success: false,
+                error: errorMessage,
+                errorCode: data.errorCode,
+            };
+        }
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            "Lỗi khi tải danh sách chiến dịch";
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+
+// API lấy danh sách tasks được giao cho examiner
+export const getMyTasks = async () => {
+    try {
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const response = await fetch(`${API_BASE_URL}/users/my-tasks`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        // Kiểm tra code === 0 (success) theo format API
+        if (data.code === 0 && data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        } else {
+            const errorMessage =
+                data.errorMessage ||
+                data.message ||
+                "Không thể lấy danh sách công việc";
+            return {
+                success: false,
+                error: errorMessage,
+                errorCode: data.errorCode,
+            };
+        }
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            "Lỗi khi tải danh sách công việc";
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+

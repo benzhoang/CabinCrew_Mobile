@@ -57,7 +57,7 @@ const dictionaries = {
         // Home
         home_title: 'Trang chủ',
         campaign: 'Chiến dịch',
-        applications: 'Ứng tuyển',
+        task: 'Công việc',
         interviews: 'Phỏng vấn',
         scoring: 'Chấm điểm',
         welcome_back: 'Chào mừng bạn trở lại',
@@ -121,7 +121,7 @@ const dictionaries = {
         // Home
         home_title: 'Home',
         campaign: 'Campaign',
-        applications: 'Applications',
+        task: 'Task',
         interviews: 'Interviews',
         scoring: 'Scoring',
         welcome_back: 'Welcome back',

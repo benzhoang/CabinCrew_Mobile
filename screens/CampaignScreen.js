@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,175 +8,94 @@ import {
     StatusBar,
     ScrollView,
     FlatList,
+    ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from '../i18n';
+import { getMyCampaigns } from '../service/api';
 
 export default function CampaignScreen({ onSignOutPress, onBackPress, navigation }) {
     const { t, lang } = useTranslation();
     const [selectedStatus, setSelectedStatus] = useState('active');
+    const [campaigns, setCampaigns] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Dữ liệu campaign từ CabinCrew web app
-    const campaigns = [
-        {
-            id: 1,
-            name: 'Tuyển dụng Tiếp viên hàng không 2024',
-            position: 'Flight Attendant',
-            department: 'Cabin Crew',
-            status: 'active',
-            startDate: '2024-01-15',
-            endDate: '2024-03-15',
-            targetHires: 20,
-            currentHires: 8,
-            description: 'Tuyển dụng tiếp viên hàng không cho các chuyến bay nội địa và quốc tế',
-            requirements: 'Tiếng Anh tốt, Chiều cao 1.60m+, Kỹ năng giao tiếp, Sức khỏe tốt',
-            batches: [
-                {
-                    id: 1,
-                    name: 'Đợt 1',
-                    status: 'Đang diễn ra',
-                    startDate: '1/10/2024',
-                    endDate: '15/10/2024',
-                    location: 'Hà Nội',
-                    format: 'Trực tiếp',
-                    manager: 'Nguyễn Thanh Tùng',
-                    targetHires: 10,
-                    currentHires: 7,
-                    progress: 70,
-                    notes: 'Phỏng vấn vòng 1'
-                },
-                {
-                    id: 2,
-                    name: 'Đợt 2',
-                    status: 'Sắp diễn ra',
-                    startDate: '1/11/2024',
-                    endDate: '15/11/2024',
-                    location: 'TP.HCM',
-                    format: 'Trực tiếp',
-                    manager: 'Trần Bảo Vy',
-                    targetHires: 10,
-                    currentHires: 0,
-                    progress: 0,
-                    notes: 'Phỏng vấn vòng 2'
-                }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Chiến dịch Pilot Training',
-            position: 'Pilot',
-            department: 'Flight Operations',
-            status: 'completed',
-            startDate: '2024-01-01',
-            endDate: '2024-02-28',
-            targetHires: 5,
-            currentHires: 5,
-            description: 'Tuyển dụng và đào tạo phi công cho đội bay mới',
-            requirements: 'Bằng lái máy bay, Kinh nghiệm bay, Tiếng Anh thành thạo',
-            batches: [
-                {
-                    id: 3,
-                    name: 'Đợt 1',
-                    status: 'Hoàn thành',
-                    startDate: '1/1/2024',
-                    endDate: '28/2/2024',
-                    location: 'Hà Nội',
-                    format: 'Trực tiếp',
-                    manager: 'Phạm Văn Đức',
-                    targetHires: 5,
-                    currentHires: 5,
-                    progress: 100,
-                    notes: 'Đào tạo phi công'
-                }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Ground Staff Campaign',
-            position: 'Ground Staff',
-            department: 'Ground Operations',
-            status: 'paused',
-            startDate: '2024-02-01',
-            endDate: '2024-04-30',
-            targetHires: 15,
-            currentHires: 6,
-            description: 'Tuyển dụng nhân viên mặt đất cho sân bay',
-            requirements: 'Kỹ năng xử lý hành lý, Giao tiếp tốt, Làm việc ca',
-            batches: [
-                {
-                    id: 4,
-                    name: 'Đợt 1',
-                    status: 'Tạm dừng',
-                    startDate: '1/2/2024',
-                    endDate: '30/4/2024',
-                    location: 'TP.HCM',
-                    format: 'Trực tiếp',
-                    manager: 'Lê Thị Hoa',
-                    targetHires: 15,
-                    currentHires: 6,
-                    progress: 40,
-                    notes: 'Tạm dừng do thiếu ngân sách'
-                }
-            ]
-        },
-        {
-            id: 4,
-            name: 'Customer Service Expansion',
-            position: 'Customer Service Agent',
-            department: 'Customer Service',
-            status: 'active',
-            startDate: '2024-02-15',
-            endDate: '2024-05-15',
-            targetHires: 12,
-            currentHires: 4,
-            description: 'Mở rộng đội ngũ chăm sóc khách hàng',
-            requirements: 'Kỹ năng giao tiếp, Tiếng Anh, Xử lý tình huống',
-            batches: [
-                {
-                    id: 5,
-                    name: 'Đợt 1',
-                    status: 'Đang diễn ra',
-                    startDate: '15/2/2024',
-                    endDate: '15/5/2024',
-                    location: 'Hà Nội',
-                    format: 'Trực tiếp',
-                    manager: 'Vũ Minh Tuấn',
-                    targetHires: 12,
-                    currentHires: 4,
-                    progress: 33,
-                    notes: 'Tuyển dụng nhân viên chăm sóc khách hàng'
-                }
-            ]
-        },
-        {
-            id: 5,
-            name: 'Maintenance Team',
-            position: 'Aircraft Mechanic',
-            department: 'Maintenance',
-            status: 'active',
-            startDate: '2024-03-01',
-            endDate: '2024-06-30',
-            targetHires: 8,
-            currentHires: 2,
-            description: 'Tuyển dụng kỹ thuật viên bảo trì máy bay',
-            requirements: 'Bằng kỹ thuật, Kinh nghiệm bảo trì, An toàn lao động',
-            batches: [
-                {
-                    id: 6,
-                    name: 'Đợt 1',
-                    status: 'Đang diễn ra',
-                    startDate: '1/3/2024',
-                    endDate: '30/6/2024',
-                    location: 'TP.HCM',
-                    format: 'Trực tiếp',
-                    manager: 'Hoàng Văn Nam',
-                    targetHires: 8,
-                    currentHires: 2,
-                    progress: 25,
-                    notes: 'Tuyển dụng kỹ thuật viên bảo trì'
-                }
-            ]
+    // Fetch campaigns từ API
+    useEffect(() => {
+        fetchCampaigns();
+    }, []);
+
+    const fetchCampaigns = async (isRefresh = false) => {
+        try {
+            if (isRefresh) {
+                setRefreshing(true);
+            } else {
+                setLoading(true);
+            }
+            setError(null);
+            const result = await getMyCampaigns();
+
+            if (result.success && result.data) {
+                // Map API response về format mong đợi
+                const mappedCampaigns = Array.isArray(result.data)
+                    ? result.data.map(campaign => ({
+                        id: campaign.id || campaign.campaignId,
+                        name: campaign.name || campaign.campaignName || '',
+                        position: campaign.position || campaign.jobPosition || '',
+                        department: campaign.department || campaign.departmentName || '',
+                        status: mapStatusFromAPI(campaign.status),
+                        startDate: formatDate(campaign.startDate || campaign.startTime),
+                        endDate: formatDate(campaign.endDate || campaign.endTime),
+                        targetHires: campaign.targetHires || campaign.targetNumber || 0,
+                        currentHires: campaign.currentHires || campaign.currentNumber || 0,
+                        description: campaign.description || '',
+                        requirements: campaign.requirements || '',
+                        batches: campaign.batches || [],
+                    }))
+                    : [];
+                setCampaigns(mappedCampaigns);
+            } else {
+                setError(result.error || 'Không thể tải danh sách chiến dịch');
+            }
+        } catch (err) {
+            setError('Đã xảy ra lỗi khi tải dữ liệu');
+            console.error('Error fetching campaigns:', err);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
         }
-    ];
+    };
+
+    // Map status từ API về format trong app
+    const mapStatusFromAPI = (apiStatus) => {
+        if (!apiStatus) return 'active';
+        const status = apiStatus.toLowerCase();
+        if (status.includes('active') || status.includes('đang') || status === 'ongoing') {
+            return 'active';
+        }
+        if (status.includes('complete') || status.includes('hoàn thành') || status === 'finished') {
+            return 'completed';
+        }
+        if (status.includes('pause') || status.includes('tạm dừng') || status === 'paused') {
+            return 'paused';
+        }
+        return 'active';
+    };
+
+    // Format date từ API
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        } catch (e) {
+            return dateString;
+        }
+    };
 
     const statusFilters = [
         { key: 'active', label: 'Đang hoạt động', color: '#059669' },
@@ -213,7 +132,16 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
     const filteredCampaigns = campaigns.filter(campaign => campaign.status === selectedStatus);
 
     const getProgressPercentage = (current, target) => {
-        return Math.round((current / target) * 100);
+        // Xử lý các trường hợp edge case để tránh NaN
+        const currentNum = Number(current) || 0;
+        const targetNum = Number(target) || 0;
+
+        if (targetNum === 0 || isNaN(targetNum) || isNaN(currentNum)) {
+            return 0;
+        }
+
+        const percentage = Math.round((currentNum / targetNum) * 100);
+        return isNaN(percentage) ? 0 : Math.max(0, Math.min(100, percentage)); // Đảm bảo trong khoảng 0-100
     };
 
     const handleCampaignPress = (campaign) => {
@@ -235,7 +163,9 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                         {getStatusText(item.status)}
                     </Text>
                 </View>
-                <Text style={styles.applicantCount}>{item.currentHires}/{item.targetHires} người</Text>
+                <Text style={styles.applicantCount}>
+                    {item.currentHires || 0}/{item.targetHires || 0} người
+                </Text>
             </View>
 
             <Text style={styles.campaignTitle}>{item.name}</Text>
@@ -263,8 +193,12 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     <Text style={styles.detailValue}>{item.position}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Thời gian:</Text>
-                    <Text style={styles.detailValue}>{item.startDate} - {item.endDate}</Text>
+                    <Text style={styles.detailLabel}>Ngày bắt đầu:</Text>
+                    <Text style={styles.detailValue}>{item.startDate || 'N/A'}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Ngày kết thúc:</Text>
+                    <Text style={styles.detailValue}>{item.endDate || 'N/A'}</Text>
                 </View>
             </View>
 
@@ -323,14 +257,46 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     </ScrollView>
                 </View>
 
+                {/* Loading State */}
+                {loading && (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={AIR_BLUE} />
+                        <Text style={styles.loadingText}>Đang tải danh sách chiến dịch...</Text>
+                    </View>
+                )}
+
+                {/* Error State */}
+                {!loading && error && (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity
+                            style={styles.retryButton}
+                            onPress={fetchCampaigns}
+                        >
+                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {/* Empty State */}
+                {!loading && !error && filteredCampaigns.length === 0 && (
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>Không có chiến dịch nào</Text>
+                    </View>
+                )}
+
                 {/* Campaign List */}
-                <FlatList
-                    data={filteredCampaigns}
-                    renderItem={renderCampaignCard}
-                    keyExtractor={(item) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.listContainer}
-                />
+                {!loading && !error && filteredCampaigns.length > 0 && (
+                    <FlatList
+                        data={filteredCampaigns}
+                        renderItem={renderCampaignCard}
+                        keyExtractor={(item) => item.id.toString()}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.listContainer}
+                        refreshing={refreshing}
+                        onRefresh={() => fetchCampaigns(true)}
+                    />
+                )}
             </View>
         </View>
     );
@@ -565,5 +531,53 @@ const styles = StyleSheet.create({
         color: '#6B7280',
         lineHeight: 20,
         marginTop: 8,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '500',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 20,
+    },
+    errorText: {
+        fontSize: 16,
+        color: AIR_RED,
+        textAlign: 'center',
+        marginBottom: 20,
+        fontWeight: '500',
+    },
+    retryButton: {
+        backgroundColor: AIR_BLUE,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '500',
     },
 });

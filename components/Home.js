@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useTranslation } from '../i18n';
 import CampaignScreen from '../screens/CampaignScreen';
+import TaskScreen from '../screens/TaskScreen';
 
 export default function Home({ onSignOutPress, navigation }) {
     const { t, lang } = useTranslation();
@@ -16,7 +17,7 @@ export default function Home({ onSignOutPress, navigation }) {
 
     const tabs = [
         { key: 'campaign', label: t('campaign'), icon: '📋' },
-        { key: 'applications', label: t('applications'), icon: '📝' },
+        { key: 'task', label: t('task'), icon: '📝' },
         { key: 'interviews', label: t('interviews'), icon: '🎤' },
         { key: 'scoring', label: t('scoring'), icon: '⭐' },
     ];
@@ -25,18 +26,8 @@ export default function Home({ onSignOutPress, navigation }) {
         switch (activeTab) {
             case 'campaign':
                 return <CampaignScreen onSignOutPress={onSignOutPress} navigation={navigation} />;
-            case 'applications':
-                return (
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.contentTitle}>{t('applications')}</Text>
-                        <Text style={styles.contentText}>
-                            {lang === 'vi'
-                                ? 'Xem và quản lý hồ sơ ứng tuyển'
-                                : 'View and manage job applications'
-                            }
-                        </Text>
-                    </View>
-                );
+            case 'task':
+                return <TaskScreen onSignOutPress={onSignOutPress} navigation={navigation} />;
             case 'interviews':
                 return (
                     <View style={styles.contentContainer}>
@@ -44,7 +35,7 @@ export default function Home({ onSignOutPress, navigation }) {
                         <Text style={styles.contentText}>
                             {lang === 'vi'
                                 ? 'Lên lịch và quản lý phỏng vấn'
-                                : 'Schedule and manage interviews'
+                                : 'Schedule and manage task'
                             }
                         </Text>
                     </View>
@@ -79,7 +70,7 @@ export default function Home({ onSignOutPress, navigation }) {
                         </View>
                         <View style={styles.userTextContainer}>
                             <Text style={styles.headerTitle}>{t('welcome_back')}</Text>
-                            <Text style={styles.userName}>HR User</Text>
+                            <Text style={styles.userName}>Examiner</Text>
                         </View>
                     </View>
                     <TouchableOpacity style={styles.signOutButton} onPress={onSignOutPress}>
