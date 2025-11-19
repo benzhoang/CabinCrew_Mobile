@@ -179,3 +179,53 @@ export const getMyTasks = async () => {
     }
 };
 
+// API lấy danh sách tiêu chí chấm điểm
+export const getScoringCriterias = async () => {
+    try {
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const response = await fetch(`${API_BASE_URL}/scoring-criterias`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        // Kiểm tra code === 0 (success) theo format API
+        if (data.code === 0 && data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        } else {
+            const errorMessage =
+                data.errorMessage ||
+                data.message ||
+                "Không thể lấy danh sách tiêu chí chấm điểm";
+            return {
+                success: false,
+                error: errorMessage,
+                errorCode: data.errorCode,
+            };
+        }
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            "Lỗi khi tải danh sách tiêu chí chấm điểm";
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+

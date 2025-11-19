@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,8 +7,10 @@ import {
     SafeAreaView,
     ScrollView,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 import FeedbackModal from '../components/FeedbackModal';
+import { getScoringCriterias } from '../service/api';
 
 export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmit }) {
     // selectedCriteria: key -> 'pass' | 'fail'
@@ -16,123 +18,51 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     // Bỏ trạng thái mở rộng: luôn hiển thị nút hành động
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [feedbackText, setFeedbackText] = useState('');
+    const [scoringCriteria, setScoringCriteria] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Các tiêu chí chấm điểm dựa trên hình ảnh
-    const scoringCriteria = {
-        bodyShape: {
-            title: 'Hình thể',
-            items: [
-                {
-                    id: 'bmi',
-                    text: 'Cân đối, đảm bảo nằm trong chỉ số BMI quy định',
-                    english: 'Well-proportioned, to be qualified within the prescribed BMI',
-                    details: [
-                        'Chiều cao, cân nặng đạt chuẩn theo bảng BMI của hãng',
-                        'Không thiếu cân/quá cân so với ngưỡng quy định',
-                        'Vóc dáng cân đối tổng thể'
-                    ]
-                },
-                {
-                    id: 'gait',
-                    text: 'Dáng đi cân đối, không lệch hay rung lắc',
-                    english: 'Well-proportioned gait, no deviation or shaking when walking',
-                    details: [
-                        'Bước đi thẳng, không khập khiễng',
-                        'Không lắc vai/hông quá mức',
-                        'Tư thế tự tin, vững vàng'
-                    ]
-                },
-                {
-                    id: 'arms',
-                    text: 'Cánh tay, bàn tay thẳng, cân đối không bị co rút hay dị dạng',
-                    english: 'Arms, hands straight, balanced without shrinkage or deformity',
-                    details: [
-                        'Cánh tay, bàn tay không dị tật',
-                        'Không co rút, không biến dạng',
-                        'Cử động linh hoạt'
-                    ]
-                },
-                {
-                    id: 'legs',
-                    text: 'Chân thẳng, không cong vẹo hay bên cao bên thấp',
-                    english: 'Legs are straight, no curvature or one long & one short leg',
-                    details: [
-                        'Hai chân dài tương đương',
-                        'Không vòng kiềng, không chữ X',
-                        'Khả năng đứng/di chuyển ổn định'
-                    ]
-                },
-                {
-                    id: 'shoulders',
-                    text: 'Hai bên vai cân đối, không vẹo hay lệch',
-                    english: 'The shoulders are balanced, not twisted or skewed',
-                    details: [
-                        'Độ cao hai vai tương xứng',
-                        'Không lệch vai rõ rệt',
-                        'Tư thế thẳng, không gù'
-                    ]
-                },
-                {
-                    id: 'tattoos',
-                    text: 'Không có hình xăm, sẹo hay chàm tại khu vực bên ngoài đồng phục',
-                    english: 'No tattoos, scars or birthmarks in areas outside the uniform',
-                    details: [
-                        'Không xăm lộ ra ngoài khi mặc đồng phục',
-                        'Không sẹo lồi lớn, chàm lớn vùng hở',
-                        'Không vết thẩm mỹ gây mất thẩm mỹ'
-                    ]
-                }
-            ]
-        },
-        headFace: {
-            title: 'Vùng đầu, mặt và làn da',
-            items: [
-                {
-                    id: 'hair',
-                    text: 'Tóc mọc đều',
-                    english: 'Hair grows evenly',
-                    details: [
-                        'Không hói, không mảng thưa rõ rệt',
-                        'Màu tóc phù hợp quy định',
-                        'Tóc sạch sẽ, gọn gàng'
-                    ]
-                }
-            ]
-        },
-        facialFeatures: {
-            title: 'Đặc điểm khuôn mặt',
-            items: [
-                {
-                    id: 'face_balance',
-                    text: 'Gương mặt cân đối, 2 tai cân đối và hàm răng đều đặn, không hô, móm, răng nhấp nhô hoặc màu răng quá xỉn',
-                    english: 'Balanced face, 2 ears balance and regular teeth, overbite, underbite, uneven teeth or too dull tooth color',
-                    details: [
-                        'Tỉ lệ khuôn mặt hài hòa',
-                        'Tai cân đối hai bên',
-                        'Răng đều, không hô/móm mạnh, màu răng phù hợp'
-                    ]
-                },
-                {
-                    id: 'eyes',
-                    text: 'Mắt cân đối, không cận quá 3 độ, không lé, màu mắt 2 bên đồng đều',
-                    english: 'Balanced eyes, short-signed but not more than 3 degrees, no squint, eye color on both sides evenly',
-                    details: [
-                        'Không lé, không lác',
-                        'Cận không quá 3 độ (nếu có)',
-                        'Màu mắt đồng đều hai bên'
-                    ]
-                },
-                {
-                    id: 'jaw',
-                    text: 'Hàm không lệch, không móm',
-                    english: 'Jaw bone is not misaligned, must be in shape',
-                    details: [
-                        'Không lệch khớp hàm',
-                        'Không móm/hô nặng',
-                        'Đường nét hàm hài hòa'
-                    ]
-                }
-            ]
+    // Fetch scoring criteria từ API
+    useEffect(() => {
+        fetchScoringCriterias();
+    }, []);
+
+    const fetchScoringCriterias = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const result = await getScoringCriterias();
+
+            if (result.success && result.data) {
+                // Map data từ API sang format mà component đang sử dụng
+                const mappedCriteria = {};
+
+                result.data.forEach((category, index) => {
+                    // Tạo key cho category (có thể dùng index hoặc tạo từ title)
+                    const categoryKey = `category_${index}`;
+
+                    mappedCriteria[categoryKey] = {
+                        title: category.title || '',
+                        items: (category.items || []).map(item => ({
+                            id: item.scoringCriteriaItemId?.toString() || '',
+                            text: item.text || '',
+                            english: item.englishText || '',
+                            details: (item.details || []).map(detail => detail.detailText || '')
+                        }))
+                    };
+                });
+
+                setScoringCriteria(mappedCriteria);
+            } else {
+                setError(result.error || 'Không thể tải danh sách tiêu chí');
+                Alert.alert('Lỗi', result.error || 'Không thể tải danh sách tiêu chí');
+            }
+        } catch (err) {
+            const errorMessage = err.message || 'Lỗi khi tải danh sách tiêu chí';
+            setError(errorMessage);
+            Alert.alert('Lỗi', errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -167,7 +97,9 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     const getTotalCriteria = () => {
         let total = 0;
         Object.values(scoringCriteria).forEach(category => {
-            total += category.items.length;
+            if (category && category.items) {
+                total += category.items.length;
+            }
         });
         return total;
     };
@@ -272,12 +204,66 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
         );
     };
 
-    const renderCategory = (categoryKey, category) => (
-        <View key={categoryKey} style={styles.categoryContainer}>
-            <Text style={styles.categoryTitle}>{category.title}</Text>
-            {category.items.map(item => renderCriterionItem(categoryKey, item))}
-        </View>
-    );
+    const renderCategory = (categoryKey, category) => {
+        if (!category || !category.items || category.items.length === 0) {
+            return null;
+        }
+        return (
+            <View key={categoryKey} style={styles.categoryContainer}>
+                <Text style={styles.categoryTitle}>{category.title}</Text>
+                {category.items.map(item => renderCriterionItem(categoryKey, item))}
+            </View>
+        );
+    };
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <View style={styles.userInfo}>
+                        <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
+                            <Text style={styles.backIcon}>←</Text>
+                        </TouchableOpacity>
+                        <View style={styles.userTextContainer}>
+                            <Text style={styles.headerTitle}>Chấm điểm ứng viên</Text>
+                            <Text style={styles.userName}>{candidateData?.name || 'Ứng viên'}</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={AIR_BLUE} />
+                    <Text style={styles.loadingText}>Đang tải tiêu chí chấm điểm...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <View style={styles.userInfo}>
+                        <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
+                            <Text style={styles.backIcon}>←</Text>
+                        </TouchableOpacity>
+                        <View style={styles.userTextContainer}>
+                            <Text style={styles.headerTitle}>Chấm điểm ứng viên</Text>
+                            <Text style={styles.userName}>{candidateData?.name || 'Ứng viên'}</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity
+                        style={styles.retryButton}
+                        onPress={fetchScoringCriterias}
+                    >
+                        <Text style={styles.retryButtonText}>Thử lại</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -303,7 +289,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                     <View
                         style={[
                             styles.progressFill,
-                            { width: `${(getTotalSelectedCriteria() / getTotalCriteria()) * 100}%` }
+                            { width: getTotalCriteria() > 0 ? `${(getTotalSelectedCriteria() / getTotalCriteria()) * 100}%` : '0%' }
                         ]}
                     />
                 </View>
@@ -311,9 +297,11 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
 
             {/* Scoring Criteria */}
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {Object.entries(scoringCriteria).map(([categoryKey, category]) =>
-                    renderCategory(categoryKey, category)
-                )}
+                {Object.entries(scoringCriteria)
+                    .filter(([_, category]) => category && category.items && category.items.length > 0)
+                    .map(([categoryKey, category]) =>
+                        renderCategory(categoryKey, category)
+                    )}
             </ScrollView>
 
             {/* Action Buttons */}
@@ -616,5 +604,41 @@ const styles = StyleSheet.create({
     },
     disabledButtonText: {
         color: '#9CA3AF',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 14,
+        color: AIR_DARK,
+        fontWeight: '500',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+        paddingHorizontal: 20,
+    },
+    errorText: {
+        fontSize: 14,
+        color: AIR_RED,
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    retryButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 10,
+        backgroundColor: AIR_BLUE,
+    },
+    retryButtonText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '700',
     },
 });
