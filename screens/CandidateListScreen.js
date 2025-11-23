@@ -1,110 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     TouchableOpacity,
     StyleSheet,
-    SafeAreaView,
-    StatusBar,
-    ScrollView,
     FlatList,
     Image,
+    ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from '../i18n';
+import { getCampaignRoundDetail, getRoundParticipants } from '../service/api';
 
 export default function CandidateListScreen({ batchData, onBackPress, navigation }) {
     const { t, lang } = useTranslation();
-    const [selectedStatus, setSelectedStatus] = useState('pending');
+    const [campaignRoundId, setCampaignRoundId] = useState(null);
+    const [appearanceRound, setAppearanceRound] = useState(null);
+    const [candidates, setCandidates] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Dữ liệu ứng viên cho đợt tuyển dụng được chọn
-    const candidates = [
-        {
-            id: 1,
-            name: 'Nguyễn Thị Hoa',
-            age: 24,
-            height: 165,
-            weight: 52,
-            education: 'Đại học Kinh tế',
-            experience: '2 năm kinh nghiệm dịch vụ',
-            phone: '0901234567',
-            email: 'hoa.nguyen@email.com',
-            status: 'pending',
-            photo: null,
-            notes: 'Ứng viên có kinh nghiệm tốt, giao tiếp lưu loát',
-            appliedDate: '15/10/2024',
-            currentStage: 'Kiểm tra ngoại hình'
-        },
-        {
-            id: 2,
-            name: 'Trần Minh Tuấn',
-            age: 26,
-            height: 175,
-            weight: 68,
-            education: 'Đại học Ngoại ngữ',
-            experience: '3 năm kinh nghiệm khách sạn',
-            phone: '0902345678',
-            email: 'tuan.tran@email.com',
-            status: 'approved',
-            photo: null,
-            notes: 'Ứng viên nam, chiều cao đạt yêu cầu',
-            appliedDate: '14/10/2024',
-            currentStage: 'Kiểm tra ngoại hình'
-        },
-        {
-            id: 3,
-            name: 'Lê Thị Mai',
-            age: 23,
-            height: 162,
-            weight: 48,
-            education: 'Cao đẳng Du lịch',
-            experience: '1 năm kinh nghiệm bán hàng',
-            phone: '0903456789',
-            email: 'mai.le@email.com',
-            status: 'rejected',
-            photo: null,
-            notes: 'Chiều cao chưa đạt yêu cầu tối thiểu',
-            appliedDate: '13/10/2024',
-            currentStage: 'Kiểm tra ngoại hình'
-        },
-        {
-            id: 4,
-            name: 'Phạm Văn Đức',
-            age: 25,
-            height: 170,
-            weight: 65,
-            education: 'Đại học Kỹ thuật',
-            experience: '2 năm kinh nghiệm dịch vụ',
-            phone: '0904567890',
-            email: 'duc.pham@email.com',
-            status: 'pending',
-            photo: null,
-            notes: 'Ứng viên có kỹ năng tiếng Anh tốt',
-            appliedDate: '12/10/2024',
-            currentStage: 'Kiểm tra ngoại hình'
-        },
-        {
-            id: 5,
-            name: 'Hoàng Thị Lan',
-            age: 22,
-            height: 168,
-            weight: 50,
-            education: 'Đại học Thương mại',
-            experience: '1 năm kinh nghiệm nhà hàng',
-            phone: '0905678901',
-            email: 'lan.hoang@email.com',
-            status: 'pending',
-            photo: null,
-            notes: 'Ứng viên trẻ, năng động',
-            appliedDate: '11/10/2024',
-            currentStage: 'Kiểm tra ngoại hình'
+    // Fetch campaign round detail từ API
+    useEffect(() => {
+        if (batchData) {
+            fetchCampaignRoundDetail();
         }
-    ];
+    }, [batchData]);
 
-    const statusFilters = [
-        { key: 'pending', label: 'Chờ duyệt', color: '#D97706' },
-        { key: 'approved', label: 'Đã duyệt', color: '#059669' },
-        { key: 'rejected', label: 'Từ chối', color: '#DC2626' },
-    ];
+    const fetchCampaignRoundDetail = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Lấy campaignRoundId từ batchData (có thể là campaignRoundId hoặc id)
+            const roundId = batchData?.campaignRoundId || batchData?.id;
+
+            if (!roundId) {
+                console.error('CandidateListScreen - No campaignRoundId found in batchData');
+                setError('Không tìm thấy ID đợt tuyển dụng');
+                setLoading(false);
+                return;
+            }
+
+            console.log('CandidateListScreen - Fetching campaign round detail with ID:', roundId);
+
+            const result = await getCampaignRoundDetail(roundId);
+
+            if (result.success && result.data) {
+                console.log('CandidateListScreen - API response:', JSON.stringify(result.data, null, 2));
+
+                // Lấy campaignRoundId từ response
+                const roundDetail = result.data;
+                const fetchedCampaignRoundId = roundDetail.campaignRoundId;
+                setCampaignRoundId(fetchedCampaignRoundId);
+
+                // Lọc rounds để chỉ lấy round có roundName là "Appearance"
+                if (roundDetail.rounds && Array.isArray(roundDetail.rounds)) {
+                    const appearanceRoundData = roundDetail.rounds.find(
+                        round => round.roundName === 'Appearance'
+                    );
+
+                    if (appearanceRoundData) {
+                        setAppearanceRound(appearanceRoundData);
+                        console.log('CandidateListScreen - Found Appearance round:', appearanceRoundData);
+                        // Sau khi tìm thấy Appearance round, gọi API để lấy danh sách participants
+                        if (appearanceRoundData.roundId) {
+                            fetchParticipants(appearanceRoundData.roundId);
+                        } else {
+                            console.error('CandidateListScreen - Appearance round has no roundId');
+                            setError('Không tìm thấy ID của round Appearance');
+                            setLoading(false);
+                        }
+                    } else {
+                        console.warn('CandidateListScreen - No Appearance round found in rounds');
+                        setError('Không tìm thấy round Appearance');
+                        setLoading(false);
+                    }
+                } else {
+                    console.warn('CandidateListScreen - No rounds array found in response');
+                    setError('Không tìm thấy danh sách rounds');
+                    setLoading(false);
+                }
+            } else {
+                console.error('CandidateListScreen - API call failed:', result.error);
+                setError(result.error || 'Không thể lấy thông tin đợt tuyển dụng');
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error('CandidateListScreen - Exception in fetchCampaignRoundDetail:', err);
+            setError('Lỗi khi tải thông tin đợt tuyển dụng');
+            setLoading(false);
+        }
+    };
+
+    // Fetch danh sách participants từ API
+    const fetchParticipants = async (roundId) => {
+        try {
+            console.log('CandidateListScreen - Fetching participants for roundId:', roundId);
+            const result = await getRoundParticipants(roundId);
+
+            if (result.success && result.data) {
+                console.log('CandidateListScreen - Participants API response:', JSON.stringify(result.data, null, 2));
+
+                // Lấy items từ data (theo format API response)
+                const items = result.data.items || [];
+                console.log('CandidateListScreen - Found participants:', items.length);
+
+                // Map dữ liệu từ API sang format hiển thị
+                const mappedCandidates = items.map((item) => ({
+                    id: item.activityId || item.userId || Math.random(),
+                    name: item.fullName || 'N/A',
+                    email: item.email || 'N/A',
+                    phone: item.phoneNumber || 'N/A',
+                    photo: item.imgURL || null,
+                    status: item.status || 'pending',
+                    roundId: item.roundId || null,
+                    roundName: item.roundName || 'Appearance',
+                    userId: item.userId || null,
+                    activityId: item.activityId || null,
+                }));
+
+                setCandidates(mappedCandidates);
+            } else {
+                console.error('CandidateListScreen - Participants API call failed:', result.error);
+                setError(result.error || 'Không thể lấy danh sách ứng viên');
+            }
+        } catch (err) {
+            console.error('CandidateListScreen - Exception in fetchParticipants:', err);
+            setError('Lỗi khi tải danh sách ứng viên');
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -120,19 +147,22 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
     };
 
     const getStatusText = (status) => {
-        switch (status) {
+        if (!status) return 'Chưa xác định';
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
             case 'pending':
+            case 'chờ duyệt':
                 return 'Chờ duyệt';
             case 'approved':
+            case 'đã duyệt':
                 return 'Đã duyệt';
             case 'rejected':
+            case 'từ chối':
                 return 'Từ chối';
             default:
                 return status;
         }
     };
-
-    const filteredCandidates = candidates.filter(candidate => candidate.status === selectedStatus);
 
     const handleCandidatePress = (candidate) => {
         // Chuyển đến màn hình chấm điểm
@@ -159,10 +189,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 </View>
                 <View style={styles.candidateInfo}>
                     <Text style={styles.candidateName}>{item.name}</Text>
-                    <Text style={styles.candidateAge}>Tuổi: {item.age}</Text>
-                    <Text style={styles.candidatePhysical}>
-                        Chiều cao: {item.height}cm | Cân nặng: {item.weight}kg
-                    </Text>
+                    <Text style={styles.candidateAge}>Round: {item.roundName || 'Appearance'}</Text>
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
                     <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
@@ -171,14 +198,6 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
 
             <View style={styles.candidateDetails}>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Học vấn:</Text>
-                    <Text style={styles.detailValue}>{item.education}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Kinh nghiệm:</Text>
-                    <Text style={styles.detailValue}>{item.experience}</Text>
-                </View>
-                <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Điện thoại:</Text>
                     <Text style={styles.detailValue}>{item.phone}</Text>
                 </View>
@@ -186,22 +205,15 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                     <Text style={styles.detailLabel}>Email:</Text>
                     <Text style={styles.detailValue}>{item.email}</Text>
                 </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Ngày ứng tuyển:</Text>
-                    <Text style={styles.detailValue}>{item.appliedDate}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Giai đoạn hiện tại:</Text>
-                    <Text style={[styles.detailValue, styles.currentStageText]}>{item.currentStage}</Text>
-                </View>
+                {item.roundName && (
+                    <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Round:</Text>
+                        <Text style={[styles.detailValue, styles.currentStageText]}>{item.roundName}</Text>
+                    </View>
+                )}
             </View>
 
-            <View style={styles.notesSection}>
-                <Text style={styles.notesLabel}>Ghi chú:</Text>
-                <Text style={styles.notesText}>{item.notes}</Text>
-            </View>
-
-            {item.status === 'pending' && (
+            {item.status && item.status.toLowerCase() === 'pending' && (
                 <View style={styles.actionButtons}>
                     <TouchableOpacity
                         style={[styles.actionButton, styles.detailButton]}
@@ -229,47 +241,48 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 </View>
             </View>
 
-            {/* Candidate List với Filter */}
+            {/* Candidate List */}
             <View style={styles.content}>
-                {/* Filter Buttons */}
-                <View style={styles.filterContainer}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.filterScrollContent}
-                        bounces={false}
-                        decelerationRate="fast"
-                    >
-                        {statusFilters.map((filter) => (
-                            <TouchableOpacity
-                                key={filter.key}
-                                style={[
-                                    styles.filterButton,
-                                    selectedStatus === filter.key && styles.activeFilterButton,
-                                    { borderColor: filter.color }
-                                ]}
-                                onPress={() => setSelectedStatus(filter.key)}
-                            >
-                                <Text style={[
-                                    styles.filterText,
-                                    selectedStatus === filter.key && styles.activeFilterText,
-                                    { color: selectedStatus === filter.key ? 'white' : filter.color }
-                                ]}>
-                                    {filter.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
+                {/* Loading State */}
+                {loading && (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={AIR_BLUE} />
+                        <Text style={styles.loadingText}>Đang tải danh sách ứng viên...</Text>
+                    </View>
+                )}
+
+                {/* Error State */}
+                {!loading && error && (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity
+                            style={styles.retryButton}
+                            onPress={() => {
+                                if (batchData) {
+                                    fetchCampaignRoundDetail();
+                                }
+                            }}
+                        >
+                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
                 {/* Candidate List */}
-                <FlatList
-                    data={filteredCandidates}
-                    renderItem={renderCandidateCard}
-                    keyExtractor={(item) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.listContainer}
-                />
+                {!loading && !error && (
+                    <FlatList
+                        data={candidates}
+                        renderItem={renderCandidateCard}
+                        keyExtractor={(item) => (item.id || item.activityId || item.userId || Math.random()).toString()}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.listContainer}
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>Không có ứng viên nào</Text>
+                            </View>
+                        }
+                    />
+                )}
             </View>
         </View>
     );
@@ -331,45 +344,53 @@ const styles = StyleSheet.create({
         color: '#6B7280',
         fontWeight: '500',
     },
-    filterContainer: {
-        paddingVertical: 12,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-    },
-    filterScrollContent: {
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    filterButton: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 25,
-        borderWidth: 2,
-        marginRight: 12,
-        backgroundColor: 'white',
-        minWidth: 80,
-        alignItems: 'center',
+    loadingContainer: {
+        flex: 1,
         justifyContent: 'center',
-        flexShrink: 0,
+        alignItems: 'center',
+        paddingVertical: 60,
     },
-    activeFilterButton: {
-        backgroundColor: AIR_BLUE,
-        borderColor: AIR_BLUE,
-        shadowColor: AIR_BLUE,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 3,
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '500',
     },
-    filterText: {
-        fontSize: 14,
-        fontWeight: '700',
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 20,
+    },
+    errorText: {
+        fontSize: 16,
+        color: AIR_RED,
         textAlign: 'center',
+        marginBottom: 20,
+        fontWeight: '500',
     },
-    activeFilterText: {
+    retryButton: {
+        backgroundColor: AIR_BLUE,
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    retryButtonText: {
         color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '500',
     },
     content: {
         flex: 1,

@@ -124,18 +124,37 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
     };
 
     // Map status từ API về format hiển thị
+    // API trả về: Ended, Ongoing, Upcoming
     const mapStatusFromAPI = (apiStatus) => {
         if (!apiStatus) return 'Sắp diễn ra';
-        const status = apiStatus.toLowerCase();
+        const status = apiStatus.trim().toLowerCase();
+
+        // Map theo Swagger: Ended, Ongoing, Upcoming
+        if (status === 'ended') {
+            return 'Hoàn thành';
+        }
+        if (status === 'ongoing') {
+            return 'Đang diễn ra';
+        }
+        if (status === 'upcoming') {
+            return 'Sắp diễn ra';
+        }
+
+        // Fallback cho các trường hợp khác (nếu có)
         if (status.includes('ongoing') || status.includes('đang')) {
             return 'Đang diễn ra';
         }
-        if (status.includes('finished') || status.includes('completed') || status.includes('hoàn thành')) {
+        if (status.includes('ended') || status.includes('finished') || status.includes('completed') || status.includes('hoàn thành')) {
             return 'Hoàn thành';
+        }
+        if (status.includes('upcoming') || status.includes('sắp')) {
+            return 'Sắp diễn ra';
         }
         if (status.includes('paused') || status.includes('tạm dừng')) {
             return 'Tạm dừng';
         }
+
+        // Default
         return 'Sắp diễn ra';
     };
 
