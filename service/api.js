@@ -572,3 +572,63 @@ export const getRoundParticipants = async (roundId) => {
     }
 };
 
+
+// API gửi kết quả chấm điểm Appearance
+export const submitAppearanceResult = async ({ activityId, comment, choices }) => {
+    try {
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const payload = {
+            activityId,
+            comment: comment ?? '',
+            choices: Array.isArray(choices) ? choices : [],
+        };
+
+        const response = await fetch(`${API_BASE_URL}/appearance-results`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: data?.errorMessage || data?.message || `HTTP ${response.status}: Không thể gửi kết quả`,
+                errorCode: data?.errorCode || response.status,
+            };
+        }
+
+        if (data?.code === 0 || data?.data || response.status === 201) {
+            return {
+                success: true,
+                data: data?.data || data,
+                message: data?.message,
+            };
+        }
+
+        return {
+            success: false,
+            error: data?.errorMessage || data?.message || 'Không thể gửi kết quả Appearance',
+        };
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            'Lỗi khi gửi kết quả Appearance';
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+

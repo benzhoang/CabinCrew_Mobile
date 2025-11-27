@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import FeedbackModal from '../components/FeedbackModal';
-import { getScoringCriterias } from '../service/api';
+import { getScoringCriterias, submitAppearanceResult } from '../service/api';
 
 export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmit }) {
     // selectedCriteria: key -> 'pass' | 'fail'
@@ -21,6 +21,12 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     const [scoringCriteria, setScoringCriteria] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Debug info
+    useEffect(() => {
+        console.log('[ScoringScreen] candidateData', candidateData);
+    }, [candidateData]);
 
     // Fetch scoring criteria từ API
     useEffect(() => {
@@ -32,6 +38,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
             setLoading(true);
             setError(null);
             const result = await getScoringCriterias();
+            console.log('[ScoringScreen] getScoringCriterias result', result);
 
             if (result.success && result.data) {
                 // Map data từ API sang format mà component đang sử dụng
@@ -59,6 +66,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
             }
         } catch (err) {
             const errorMessage = err.message || 'Lỗi khi tải danh sách tiêu chí';
+            console.log('[ScoringScreen] getScoringCriterias error', err);
             setError(errorMessage);
             Alert.alert('Lỗi', errorMessage);
         } finally {
@@ -104,8 +112,28 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
         return total;
     };
 
+    const buildChoicesPayload = () => {
+        const choices = [];
+        Object.entries(scoringCriteria).forEach(([categoryKey, category]) => {
+            if (!category || !Array.isArray(category.items)) {
+                return;
+            }
+            category.items.forEach(item => {
+                const status = getCriterionStatus(categoryKey, item.id);
+                if (status === 'pass' || status === 'fail') {
+                    const parsedId = Number(item.id);
+                    choices.push({
+                        scoringCriteriaItemId: Number.isNaN(parsedId) ? item.id : parsedId,
+                        isPassed: status === 'pass',
+                    });
+                }
+            });
+        });
+        return choices;
+    };
+
     const canSubmit = () => {
-        return getTotalSelectedCriteria() === getTotalCriteria();
+        return !submitting && getTotalSelectedCriteria() === getTotalCriteria();
     };
 
     const handleSubmitResult = () => {
@@ -116,10 +144,54 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
         setShowFeedbackModal(true);
     };
 
-    const handleConfirmSubmit = (text) => {
-        setFeedbackText(text || '');
+    const handleConfirmSubmit = async (text) => {
+        const comment = text || '';
+        setFeedbackText(comment);
         setShowFeedbackModal(false);
-        onScoreSubmit?.(candidateData, 'submitted', selectedCriteria, text || '');
+
+        const activityIdRaw = candidateData?.activityId;
+        const activityIdNumber = Number(activityIdRaw);
+        const activityId = Number.isNaN(activityIdNumber) ? activityIdRaw : activityIdNumber;
+
+        if (!activityId) {
+            console.log('[ScoringScreen] Missing activityId', candidateData);
+            Alert.alert('Lỗi', 'Không tìm thấy activityId của ứng viên để gửi kết quả');
+            return;
+        }
+
+        const choices = buildChoicesPayload();
+        if (!choices.length) {
+            console.log('[ScoringScreen] No choices payload', scoringCriteria);
+            Alert.alert('Lỗi', 'Không có dữ liệu tiêu chí để gửi');
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+            console.log('[ScoringScreen] submitAppearanceResult payload', {
+                activityId,
+                comment,
+                choicesCount: choices.length,
+            });
+            const result = await submitAppearanceResult({
+                activityId,
+                comment,
+                choices,
+            });
+            console.log('[ScoringScreen] submitAppearanceResult response', result);
+
+            if (result.success) {
+                onScoreSubmit?.(candidateData, 'submitted', selectedCriteria, comment);
+            } else {
+                Alert.alert('Lỗi', result.error || 'Không thể gửi kết quả');
+            }
+        } catch (err) {
+            const errorMessage = err.message || 'Không thể gửi kết quả';
+            console.log('[ScoringScreen] submitAppearanceResult error', err);
+            Alert.alert('Lỗi', errorMessage);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const renderCriterionItem = (category, item) => {
@@ -320,7 +392,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                         styles.submitButtonText,
                         !canSubmit() && styles.disabledButtonText
                     ]}>
-                        Gửi kết quả
+                        {submitting ? 'Đang gửi...' : 'Gửi kết quả'}
                     </Text>
                 </TouchableOpacity>
             </View>
