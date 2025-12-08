@@ -18,8 +18,6 @@ export default function Home({ onSignOutPress, navigation }) {
     const tabs = [
         { key: 'campaign', label: t('campaign'), icon: '📋' },
         { key: 'task', label: t('task'), icon: '📝' },
-        { key: 'interviews', label: t('interviews'), icon: '🎤' },
-        { key: 'scoring', label: t('scoring'), icon: '⭐' },
     ];
 
     const renderContent = () => {
