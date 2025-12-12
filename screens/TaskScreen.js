@@ -65,10 +65,10 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 }
                 setTasks(mappedTasks);
             } else {
-                setError(result.error || 'Không thể tải danh sách công việc');
+                setError(result.error || t('task_error'));
             }
         } catch (err) {
-            setError('Đã xảy ra lỗi khi tải dữ liệu');
+            setError(t('task_error_general'));
             console.error('Error fetching tasks:', err);
         } finally {
             setLoading(false);
@@ -159,13 +159,13 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
     const getStatusText = (status) => {
         switch (status) {
             case 'pending':
-                return 'Đã giao';
+                return t('task_assigned');
             case 'in_progress':
-                return 'Đang thực hiện';
+                return t('task_in_progress');
             case 'completed':
-                return 'Hoàn thành';
+                return t('task_completed');
             case 'cancelled':
-                return 'Đã hủy';
+                return t('task_cancelled');
             default:
                 return status;
         }
@@ -185,10 +185,10 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
     };
 
     const statusFilters = [
-        { key: 'pending', label: 'Đã giao', color: '#D97706' },
-        { key: 'in_progress', label: 'Đang thực hiện', color: '#0EA5E9' },
-        { key: 'completed', label: 'Hoàn thành', color: '#059669' },
-        { key: 'cancelled', label: 'Đã hủy', color: '#DC2626' },
+        { key: 'pending', label: t('task_assigned'), color: '#D97706' },
+        { key: 'in_progress', label: t('task_in_progress'), color: '#0EA5E9' },
+        { key: 'completed', label: t('task_completed'), color: '#059669' },
+        { key: 'cancelled', label: t('task_cancelled'), color: '#DC2626' },
     ];
 
     const filteredTasks = tasks.filter(task => task.status === selectedStatus);
@@ -213,7 +213,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Công việc */}
                 {item.title && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Công việc:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_title')}</Text>
                         <Text style={styles.detailValue}>{item.title}</Text>
                     </View>
                 )}
@@ -221,7 +221,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Mô tả công việc */}
                 {item.description && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Mô tả công việc:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_description')}</Text>
                         <Text style={styles.detailValue}>{item.description}</Text>
                     </View>
                 )}
@@ -229,14 +229,14 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Giao bởi */}
                 {item.assignedBy && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Giao bởi:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_assigned_by')}</Text>
                         <Text style={styles.detailValue}>{item.assignedBy}</Text>
                     </View>
                 )}
 
                 {/* Trạng thái */}
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Trạng thái:</Text>
+                    <Text style={styles.detailLabel}>{t('task_label_status')}</Text>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
                         <Text style={styles.statusBadgeText}>{getStatusText(item.status)}</Text>
                     </View>
@@ -245,7 +245,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Ngày bắt đầu */}
                 {item.startDate && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Ngày bắt đầu:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_start_date')}</Text>
                         <Text style={styles.detailValue}>{item.startDate}</Text>
                     </View>
                 )}
@@ -253,7 +253,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Ngày giao */}
                 {item.assignedAt && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Ngày giao:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_assigned_at')}</Text>
                         <Text style={styles.detailValue}>{item.assignedAt}</Text>
                     </View>
                 )}
@@ -261,7 +261,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Ngày kết thúc */}
                 {item.endDate && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Ngày kết thúc:</Text>
+                        <Text style={styles.detailLabel}>{t('task_label_end_date')}</Text>
                         <Text style={styles.detailValue}>{item.endDate}</Text>
                     </View>
                 )}
@@ -308,7 +308,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {loading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color={AIR_BLUE} />
-                        <Text style={styles.loadingText}>Đang tải danh sách công việc...</Text>
+                        <Text style={styles.loadingText}>{t('task_loading')}</Text>
                     </View>
                 )}
 
@@ -320,7 +320,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                             style={styles.retryButton}
                             onPress={fetchTasks}
                         >
-                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                            <Text style={styles.retryButtonText}>{t('task_retry')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -328,7 +328,7 @@ export default function TaskScreen({ onSignOutPress, navigation }) {
                 {/* Empty State */}
                 {!loading && !error && filteredTasks.length === 0 && (
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Không có công việc nào</Text>
+                        <Text style={styles.emptyText}>{t('task_empty')}</Text>
                     </View>
                 )}
 

@@ -36,7 +36,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
 
             if (!roundId) {
                 console.error('CandidateListScreen - No campaignRoundId found in batchData');
-                setError('Không tìm thấy ID đợt tuyển dụng');
+                setError(t('candidate_error_round_id'));
                 setLoading(false);
                 return;
             }
@@ -67,27 +67,27 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                             fetchParticipants(appearanceRoundData.roundId);
                         } else {
                             console.error('CandidateListScreen - Appearance round has no roundId');
-                            setError('Không tìm thấy ID của round Appearance');
+                            setError(t('candidate_error_round_id_missing'));
                             setLoading(false);
                         }
                     } else {
                         console.warn('CandidateListScreen - No Appearance round found in rounds');
-                        setError('Không tìm thấy round Appearance');
+                        setError(t('candidate_error_appearance_round'));
                         setLoading(false);
                     }
                 } else {
                     console.warn('CandidateListScreen - No rounds array found in response');
-                    setError('Không tìm thấy danh sách rounds');
+                    setError(t('candidate_error_rounds'));
                     setLoading(false);
                 }
             } else {
                 console.error('CandidateListScreen - API call failed:', result.error);
-                setError(result.error || 'Không thể lấy thông tin đợt tuyển dụng');
+                setError(result.error || t('candidate_error_round'));
                 setLoading(false);
             }
         } catch (err) {
             console.error('CandidateListScreen - Exception in fetchCampaignRoundDetail:', err);
-            setError('Lỗi khi tải thông tin đợt tuyển dụng');
+            setError(t('candidate_error_round'));
             setLoading(false);
         }
     };
@@ -122,11 +122,11 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 setCandidates(mappedCandidates);
             } else {
                 console.error('CandidateListScreen - Participants API call failed:', result.error);
-                setError(result.error || 'Không thể lấy danh sách ứng viên');
+                setError(result.error || t('candidate_error'));
             }
         } catch (err) {
             console.error('CandidateListScreen - Exception in fetchParticipants:', err);
-            setError('Lỗi khi tải danh sách ứng viên');
+            setError(t('candidate_error'));
         } finally {
             setLoading(false);
         }
@@ -134,31 +134,48 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
 
 
     const getStatusColor = (status) => {
-        switch (status) {
+        if (!status) return '#6B7280';
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
             case 'pending':
-                return '#D97706';
+                return '#D97706'; // Vàng - Chờ duyệt
             case 'approved':
-                return '#059669';
+                return '#059669'; // Xanh lá - Đã duyệt
             case 'rejected':
-                return '#DC2626';
+                return '#DC2626'; // Đỏ - Từ chối
+            case 'passed':
+                return '#059669'; // Xanh lá - Đã đạt
+            case 'ongoing':
+                return '#0EA5E9'; // Xanh dương - Đang diễn ra
+            case 'failed':
+                return '#DC2626'; // Đỏ - Không đạt
             default:
-                return '#6B7280';
+                return '#6B7280'; // Xám - Mặc định
         }
     };
 
     const getStatusText = (status) => {
-        if (!status) return 'Chưa xác định';
+        if (!status) return t('candidate_status_undetermined');
         const statusLower = status.toLowerCase();
         switch (statusLower) {
             case 'pending':
             case 'chờ duyệt':
-                return 'Chờ duyệt';
+                return t('candidate_status_pending');
             case 'approved':
             case 'đã duyệt':
-                return 'Đã duyệt';
+                return t('candidate_status_approved');
             case 'rejected':
             case 'từ chối':
-                return 'Từ chối';
+                return t('candidate_status_rejected');
+            case 'passed':
+            case 'đã đạt':
+                return t('candidate_status_passed');
+            case 'ongoing':
+            case 'đang diễn ra':
+                return t('candidate_status_ongoing');
+            case 'failed':
+            case 'không đạt':
+                return t('candidate_status_failed');
             default:
                 return status;
         }
@@ -198,16 +215,16 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
 
             <View style={styles.candidateDetails}>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Điện thoại:</Text>
+                    <Text style={styles.detailLabel}>{t('candidate_label_phone')}</Text>
                     <Text style={styles.detailValue}>{item.phone}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Email:</Text>
+                    <Text style={styles.detailLabel}>{t('candidate_label_email')}</Text>
                     <Text style={styles.detailValue}>{item.email}</Text>
                 </View>
                 {item.roundName && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Round:</Text>
+                        <Text style={styles.detailLabel}>{t('candidate_label_round')}</Text>
                         <Text style={[styles.detailValue, styles.currentStageText]}>{item.roundName}</Text>
                     </View>
                 )}
@@ -219,7 +236,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                         style={[styles.actionButton, styles.detailButton]}
                         onPress={() => handleCandidatePress(item)}
                     >
-                        <Text style={styles.detailButtonText}>Chấm điểm ngoại hình</Text>
+                        <Text style={styles.detailButtonText}>{t('candidate_score_appearance')}</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -235,8 +252,8 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                         <Text style={styles.backIcon}>←</Text>
                     </TouchableOpacity>
                     <View style={styles.userTextContainer}>
-                        <Text style={styles.headerTitle}>Danh sách ứng viên</Text>
-                        <Text style={styles.userName}>{batchData?.name || 'Đợt tuyển dụng'}</Text>
+                        <Text style={styles.headerTitle}>{t('candidate_list_title')}</Text>
+                        <Text style={styles.userName}>{batchData?.name || t('candidate_batch_name')}</Text>
                     </View>
                 </View>
             </View>
@@ -247,7 +264,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 {loading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color={AIR_BLUE} />
-                        <Text style={styles.loadingText}>Đang tải danh sách ứng viên...</Text>
+                        <Text style={styles.loadingText}>{t('candidate_loading')}</Text>
                     </View>
                 )}
 
@@ -263,7 +280,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                                 }
                             }}
                         >
-                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                            <Text style={styles.retryButtonText}>{t('candidate_retry')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -278,7 +295,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                         contentContainerStyle={styles.listContainer}
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không có ứng viên nào</Text>
+                                <Text style={styles.emptyText}>{t('candidate_empty')}</Text>
                             </View>
                         }
                     />

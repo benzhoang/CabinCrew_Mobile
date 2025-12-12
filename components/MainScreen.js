@@ -6,7 +6,7 @@ export default function MainScreen({ onSignInPress, currentLang, onLanguageChang
     const { t, lang, changeLanguage } = useTranslation();
 
     const toggleLanguage = () => {
-        const newLang = lang === 'vi' ? 'en' : 'vi';
+        const newLang = lang === 'en' ? 'vi' : 'en';
         changeLanguage(newLang);
         // Truyền ngôn ngữ mới lên App.js
         if (onLanguageChange) {
@@ -17,16 +17,16 @@ export default function MainScreen({ onSignInPress, currentLang, onLanguageChang
     return (
         <SafeAreaView style={styles.safe}>
             <View style={styles.container}>
-                {/* Language Toggle Button */}
+                {/* Language Toggle Button
                 <TouchableOpacity
                     style={styles.languageButton}
                     onPress={toggleLanguage}
                     activeOpacity={0.7}
                 >
                     <Text style={styles.languageText}>
-                        {lang === 'vi' ? 'EN' : 'VI'}
+                        {lang === 'en' ? 'VI' : 'EN'}
                     </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <View style={styles.heroContainer}>
                     <Image

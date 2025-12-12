@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 import FeedbackModal from '../components/FeedbackModal';
 import { getScoringCriterias, submitAppearanceResult } from '../service/api';
+import { useTranslation } from '../i18n';
 
 export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmit }) {
+    const { t } = useTranslation();
     // selectedCriteria: key -> 'pass' | 'fail'
     const [selectedCriteria, setSelectedCriteria] = useState({});
     // Bỏ trạng thái mở rộng: luôn hiển thị nút hành động
@@ -61,14 +63,14 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
 
                 setScoringCriteria(mappedCriteria);
             } else {
-                setError(result.error || 'Không thể tải danh sách tiêu chí');
-                Alert.alert('Lỗi', result.error || 'Không thể tải danh sách tiêu chí');
+                setError(result.error || t('scoring_error'));
+                Alert.alert(t('scoring_error_title'), result.error || t('scoring_error'));
             }
         } catch (err) {
-            const errorMessage = err.message || 'Lỗi khi tải danh sách tiêu chí';
+            const errorMessage = err.message || t('scoring_error_general');
             console.log('[ScoringScreen] getScoringCriterias error', err);
             setError(errorMessage);
-            Alert.alert('Lỗi', errorMessage);
+            Alert.alert(t('scoring_error_title'), errorMessage);
         } finally {
             setLoading(false);
         }
@@ -138,7 +140,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
 
     const handleSubmitResult = () => {
         if (!canSubmit()) {
-            Alert.alert('Thông báo', 'Vui lòng chấm hết tất cả tiêu chí trước khi gửi kết quả');
+            Alert.alert(t('scoring_info_title'), t('scoring_submit_message'));
             return;
         }
         setShowFeedbackModal(true);
@@ -155,14 +157,14 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
 
         if (!activityId) {
             console.log('[ScoringScreen] Missing activityId', candidateData);
-            Alert.alert('Lỗi', 'Không tìm thấy activityId của ứng viên để gửi kết quả');
+            Alert.alert(t('scoring_error_title'), t('scoring_error_activity_id'));
             return;
         }
 
         const choices = buildChoicesPayload();
         if (!choices.length) {
             console.log('[ScoringScreen] No choices payload', scoringCriteria);
-            Alert.alert('Lỗi', 'Không có dữ liệu tiêu chí để gửi');
+            Alert.alert(t('scoring_error_title'), t('scoring_error_no_data'));
             return;
         }
 
@@ -183,12 +185,12 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
             if (result.success) {
                 onScoreSubmit?.(candidateData, 'submitted', selectedCriteria, comment);
             } else {
-                Alert.alert('Lỗi', result.error || 'Không thể gửi kết quả');
+                Alert.alert(t('scoring_error_title'), result.error || t('scoring_error_submit'));
             }
         } catch (err) {
-            const errorMessage = err.message || 'Không thể gửi kết quả';
+            const errorMessage = err.message || t('scoring_error_submit');
             console.log('[ScoringScreen] submitAppearanceResult error', err);
-            Alert.alert('Lỗi', errorMessage);
+            Alert.alert(t('scoring_error_title'), errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -253,7 +255,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                                     styles.statusButtonText,
                                     styles.passButtonText,
                                     status === 'pass' && styles.activePassButtonText
-                                ]}>Đạt</Text>
+                                ]}>{t('scoring_pass')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
@@ -267,7 +269,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                                     styles.statusButtonText,
                                     styles.failButtonText,
                                     status === 'fail' && styles.activeFailButtonText
-                                ]}>Không đạt</Text>
+                                ]}>{t('scoring_fail')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -297,14 +299,14 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                             <Text style={styles.backIcon}>←</Text>
                         </TouchableOpacity>
                         <View style={styles.userTextContainer}>
-                            <Text style={styles.headerTitle}>Chấm điểm ứng viên</Text>
-                            <Text style={styles.userName}>{candidateData?.name || 'Ứng viên'}</Text>
+                            <Text style={styles.headerTitle}>{t('scoring_title')}</Text>
+                            <Text style={styles.userName}>{candidateData?.name || t('scoring_candidate')}</Text>
                         </View>
                     </View>
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={AIR_BLUE} />
-                    <Text style={styles.loadingText}>Đang tải tiêu chí chấm điểm...</Text>
+                    <Text style={styles.loadingText}>{t('scoring_loading')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -319,8 +321,8 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                             <Text style={styles.backIcon}>←</Text>
                         </TouchableOpacity>
                         <View style={styles.userTextContainer}>
-                            <Text style={styles.headerTitle}>Chấm điểm ứng viên</Text>
-                            <Text style={styles.userName}>{candidateData?.name || 'Ứng viên'}</Text>
+                            <Text style={styles.headerTitle}>{t('scoring_title')}</Text>
+                            <Text style={styles.userName}>{candidateData?.name || t('scoring_candidate')}</Text>
                         </View>
                     </View>
                 </View>
@@ -330,7 +332,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                         style={styles.retryButton}
                         onPress={fetchScoringCriterias}
                     >
-                        <Text style={styles.retryButtonText}>Thử lại</Text>
+                        <Text style={styles.retryButtonText}>{t('scoring_retry')}</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -346,8 +348,8 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                         <Text style={styles.backIcon}>←</Text>
                     </TouchableOpacity>
                     <View style={styles.userTextContainer}>
-                        <Text style={styles.headerTitle}>Chấm điểm ứng viên</Text>
-                        <Text style={styles.userName}>{candidateData?.name || 'Ứng viên'}</Text>
+                        <Text style={styles.headerTitle}>{t('scoring_title')}</Text>
+                        <Text style={styles.userName}>{candidateData?.name || t('scoring_candidate')}</Text>
                     </View>
                 </View>
             </View>
@@ -355,7 +357,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
             {/* Progress Indicator */}
             <View style={styles.progressContainer}>
                 <Text style={styles.progressText}>
-                    Đã chọn: {getTotalSelectedCriteria()}/{getTotalCriteria()} tiêu chí
+                    {t('scoring_selected')} {getTotalSelectedCriteria()}/{getTotalCriteria()} {t('scoring_criteria')}
                 </Text>
                 <View style={styles.progressBar}>
                     <View
@@ -392,7 +394,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                         styles.submitButtonText,
                         !canSubmit() && styles.disabledButtonText
                     ]}>
-                        {submitting ? 'Đang gửi...' : 'Gửi kết quả'}
+                        {submitting ? t('scoring_submitting') : t('scoring_submit')}
                     </Text>
                 </TouchableOpacity>
             </View>

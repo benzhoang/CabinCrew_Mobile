@@ -56,10 +56,10 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     : [];
                 setCampaigns(mappedCampaigns);
             } else {
-                setError(result.error || 'Không thể tải danh sách chiến dịch');
+                setError(result.error || t('campaign_error'));
             }
         } catch (err) {
-            setError('Đã xảy ra lỗi khi tải dữ liệu');
+            setError(t('campaign_error_general'));
             console.error('Error fetching campaigns:', err);
         } finally {
             setLoading(false);
@@ -98,9 +98,9 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
     };
 
     const statusFilters = [
-        { key: 'active', label: 'Đang hoạt động', color: '#059669' },
-        { key: 'completed', label: 'Hoàn thành', color: '#3B82F6' },
-        { key: 'paused', label: 'Tạm dừng', color: '#D97706' },
+        { key: 'active', label: t('campaign_status_active'), color: '#059669' },
+        { key: 'completed', label: t('campaign_status_completed'), color: '#3B82F6' },
+        { key: 'paused', label: t('campaign_status_paused'), color: '#D97706' },
     ];
 
     const getStatusColor = (status) => {
@@ -119,11 +119,11 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
     const getStatusText = (status) => {
         switch (status) {
             case 'active':
-                return 'Đang hoạt động';
+                return t('campaign_status_active');
             case 'completed':
-                return 'Hoàn thành';
+                return t('campaign_status_completed');
             case 'paused':
-                return 'Tạm dừng';
+                return t('campaign_status_paused');
             default:
                 return status;
         }
@@ -164,7 +164,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     </Text>
                 </View>
                 <Text style={styles.applicantCount}>
-                    {item.currentHires || 0}/{item.targetHires || 0} người
+                    {item.currentHires || 0}/{item.targetHires || 0} {t('campaign_people')}
                 </Text>
             </View>
 
@@ -174,7 +174,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
             {/* Progress Bar */}
             <View style={styles.progressContainer}>
                 <View style={styles.progressHeader}>
-                    <Text style={styles.progressLabel}>Tiến độ tuyển dụng</Text>
+                    <Text style={styles.progressLabel}>{t('campaign_progress')}</Text>
                     <Text style={styles.progressPercentage}>{getProgressPercentage(item.currentHires, item.targetHires)}%</Text>
                 </View>
                 <View style={styles.progressBar}>
@@ -189,15 +189,15 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
 
             <View style={styles.campaignDetails}>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Vị trí:</Text>
+                    <Text style={styles.detailLabel}>{t('campaign_label_position')}</Text>
                     <Text style={styles.detailValue}>{item.position}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Ngày bắt đầu:</Text>
+                    <Text style={styles.detailLabel}>{t('campaign_label_start_date')}</Text>
                     <Text style={styles.detailValue}>{item.startDate || 'N/A'}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Ngày kết thúc:</Text>
+                    <Text style={styles.detailLabel}>{t('campaign_label_end_date')}</Text>
                     <Text style={styles.detailValue}>{item.endDate || 'N/A'}</Text>
                 </View>
             </View>
@@ -216,7 +216,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     </View>
                     <View style={styles.userTextContainer}>
                         <Text style={styles.headerTitle}>{t('campaigns')}</Text>
-                        <Text style={styles.userName}>Quản lý chiến dịch</Text>
+                        <Text style={styles.userName}>{t('campaign_header_subtitle')}</Text>
                     </View>
                 </View>
                 <TouchableOpacity style={styles.signOutButton} onPress={onSignOutPress}>
@@ -261,7 +261,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                 {loading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color={AIR_BLUE} />
-                        <Text style={styles.loadingText}>Đang tải danh sách chiến dịch...</Text>
+                        <Text style={styles.loadingText}>{t('campaign_loading')}</Text>
                     </View>
                 )}
 
@@ -273,7 +273,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                             style={styles.retryButton}
                             onPress={fetchCampaigns}
                         >
-                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                            <Text style={styles.retryButtonText}>{t('campaign_retry')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -281,7 +281,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                 {/* Empty State */}
                 {!loading && !error && filteredCampaigns.length === 0 && (
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Không có chiến dịch nào</Text>
+                        <Text style={styles.emptyText}>{t('campaign_empty')}</Text>
                     </View>
                 )}
 

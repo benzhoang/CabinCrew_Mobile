@@ -45,7 +45,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
 
             if (!campaignId) {
                 console.error('BatchScreen - No campaignId found in campaignData');
-                setError('Không tìm thấy ID chiến dịch');
+                setError(t('batch_error_not_found'));
                 setLoading(false);
                 return;
             }
@@ -57,14 +57,14 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             // Kiểm tra result.success trước
             if (!result.success) {
                 console.error('BatchScreen - API call failed:', result.error);
-                setError(result.error || 'Không thể tải thông tin chiến dịch');
+                setError(result.error || t('batch_error'));
                 return;
             }
 
             // Kiểm tra result.data
             if (!result.data) {
                 console.error('BatchScreen - API call successful but no data received');
-                setError('Không nhận được dữ liệu từ server');
+                setError(t('batch_error_no_data'));
                 return;
             }
 
@@ -87,7 +87,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                 const mappedBatches = rounds.map((round, index) => {
                     const mapped = {
                         id: round.campaignRoundId || round.id || index + 1,
-                        name: round.roundName || round.name || `Đợt ${index + 1}`,
+                        name: round.roundName || round.name || `${t('batch_default_prefix')} ${index + 1}`,
                         status: mapStatusFromAPI(round.status),
                         startDate: formatDate(round.startDate),
                         endDate: formatDate(round.endDate),
@@ -116,7 +116,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             }
         } catch (err) {
             console.error('BatchScreen - Exception in fetchCampaignDetail:', err);
-            setError('Đã xảy ra lỗi khi tải dữ liệu');
+            setError(t('batch_error_generic'));
         } finally {
             console.log('BatchScreen - fetchCampaignDetail completed, loading set to false');
             setLoading(false);
@@ -126,36 +126,34 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
     // Map status từ API về format hiển thị
     // API trả về: Ended, Ongoing, Upcoming
     const mapStatusFromAPI = (apiStatus) => {
-        if (!apiStatus) return 'Sắp diễn ra';
+        if (!apiStatus) return 'upcoming';
         const status = apiStatus.trim().toLowerCase();
 
-        // Map theo Swagger: Ended, Ongoing, Upcoming
-        if (status === 'ended') {
-            return 'Hoàn thành';
-        }
-        if (status === 'ongoing') {
-            return 'Đang diễn ra';
-        }
-        if (status === 'upcoming') {
-            return 'Sắp diễn ra';
-        }
+        if (status === 'ended') return 'completed';
+        if (status === 'ongoing') return 'ongoing';
+        if (status === 'upcoming') return 'upcoming';
 
-        // Fallback cho các trường hợp khác (nếu có)
-        if (status.includes('ongoing') || status.includes('đang')) {
-            return 'Đang diễn ra';
-        }
-        if (status.includes('ended') || status.includes('finished') || status.includes('completed') || status.includes('hoàn thành')) {
-            return 'Hoàn thành';
-        }
-        if (status.includes('upcoming') || status.includes('sắp')) {
-            return 'Sắp diễn ra';
-        }
-        if (status.includes('paused') || status.includes('tạm dừng')) {
-            return 'Tạm dừng';
-        }
+        if (status.includes('ongoing') || status.includes('đang')) return 'ongoing';
+        if (status.includes('ended') || status.includes('finished') || status.includes('completed') || status.includes('hoàn thành')) return 'completed';
+        if (status.includes('upcoming') || status.includes('sắp')) return 'upcoming';
+        if (status.includes('paused') || status.includes('tạm dừng')) return 'paused';
 
-        // Default
-        return 'Sắp diễn ra';
+        return 'upcoming';
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'ongoing':
+                return t('batch_status_ongoing');
+            case 'upcoming':
+                return t('batch_status_upcoming');
+            case 'completed':
+                return t('batch_status_completed');
+            case 'paused':
+                return t('batch_status_paused');
+            default:
+                return t('batch_status_unknown');
+        }
     };
 
     // Format date từ API (dd/MM/yyyy HH:mm -> dd/MM/yyyy)
@@ -175,13 +173,13 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Đang diễn ra':
+            case 'ongoing':
                 return '#059669';
-            case 'Sắp diễn ra':
+            case 'upcoming':
                 return '#D97706';
-            case 'Hoàn thành':
+            case 'completed':
                 return '#3B82F6';
-            case 'Tạm dừng':
+            case 'paused':
                 return '#DC2626';
             default:
                 return '#6B7280';
@@ -225,50 +223,50 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             </View>
 
             <View style={[styles.batchStatusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-                <Text style={styles.batchStatusText}>{item.status}</Text>
+                <Text style={styles.batchStatusText}>{getStatusText(item.status)}</Text>
             </View>
 
             <View style={styles.batchDetails}>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Thời gian bắt đầu:</Text>
+                    <Text style={styles.detailLabel}>{t('batch_start_time')}</Text>
                     <Text style={styles.detailValue}>{item.startDate || 'N/A'}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Thời gian kết thúc:</Text>
+                    <Text style={styles.detailLabel}>{t('batch_end_time')}</Text>
                     <Text style={styles.detailValue}>{item.endDate || 'N/A'}</Text>
                 </View>
                 {item.location && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Địa điểm:</Text>
+                        <Text style={styles.detailLabel}>{t('batch_location')}</Text>
                         <Text style={styles.detailValue}>{item.location}</Text>
                     </View>
                 )}
                 {item.format && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Hình thức:</Text>
+                        <Text style={styles.detailLabel}>{t('batch_format')}</Text>
                         <Text style={styles.detailValue}>{item.format}</Text>
                     </View>
                 )}
                 {item.manager && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Phụ trách:</Text>
+                        <Text style={styles.detailLabel}>{t('batch_manager')}</Text>
                         <Text style={styles.detailValue}>{item.manager}</Text>
                     </View>
                 )}
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Chỉ tiêu:</Text>
+                    <Text style={styles.detailLabel}>{t('batch_target')}</Text>
                     <Text style={styles.detailValue}>{item.currentHires}/{item.targetHires}</Text>
                 </View>
                 {item.notes && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Ghi chú:</Text>
+                        <Text style={styles.detailLabel}>{t('batch_notes')}</Text>
                         <Text style={styles.detailValue}>{item.notes}</Text>
                     </View>
                 )}
             </View>
 
             <View style={styles.batchProgressSection}>
-                <Text style={styles.batchProgressTitle}>Tiến độ tuyển dụng</Text>
+                <Text style={styles.batchProgressTitle}>{t('batch_progress_title')}</Text>
                 <View style={styles.batchProgressContainer}>
                     <View style={styles.batchProgressBar}>
                         <View
@@ -285,16 +283,16 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             <TouchableOpacity
                 style={[
                     styles.batchActionButton,
-                    item.status === 'Sắp diễn ra' && styles.disabledButton
+                    item.status === 'upcoming' && styles.disabledButton
                 ]}
-                disabled={item.status === 'Sắp diễn ra'}
+                disabled={item.status === 'upcoming'}
                 onPress={() => handleCandidateListPress(item)}
             >
                 <Text style={[
                     styles.batchActionText,
-                    item.status === 'Sắp diễn ra' && styles.disabledText
+                    item.status === 'upcoming' && styles.disabledText
                 ]}>
-                    {item.status === 'Sắp diễn ra' ? 'Chưa thể xem danh sách' : 'Xem danh sách ứng viên'}
+                    {item.status === 'upcoming' ? t('batch_not_available') : t('batch_view_candidates')}
                 </Text>
             </TouchableOpacity>
         </TouchableOpacity>
@@ -309,9 +307,9 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                         <Text style={styles.backIcon}>←</Text>
                     </TouchableOpacity>
                     <View style={styles.userTextContainer}>
-                        <Text style={styles.headerTitle}>Đợt tuyển dụng</Text>
+                        <Text style={styles.headerTitle}>{t('batch_header_title')}</Text>
                         <Text style={styles.userName}>
-                            {campaignDetail?.campaignName || campaignData?.name || 'Chiến dịch'}
+                            {campaignDetail?.campaignName || campaignData?.name || t('batch_campaign_fallback')}
                         </Text>
                     </View>
                 </View>
@@ -323,7 +321,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                 {loading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color={AIR_BLUE} />
-                        <Text style={styles.loadingText}>Đang tải thông tin đợt tuyển dụng...</Text>
+                        <Text style={styles.loadingText}>{t('batch_loading')}</Text>
                     </View>
                 )}
 
@@ -335,7 +333,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                             style={styles.retryButton}
                             onPress={fetchCampaignDetail}
                         >
-                            <Text style={styles.retryButtonText}>Thử lại</Text>
+                            <Text style={styles.retryButtonText}>{t('batch_retry')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -352,11 +350,11 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                         ListHeaderComponent={
                             campaignDetail ? (
                                 <View style={styles.campaignInfoCard}>
-                                    <Text style={styles.campaignInfoTitle}>Thông tin chiến dịch</Text>
+                                    <Text style={styles.campaignInfoTitle}>{t('batch_campaign_info')}</Text>
 
                                     <View style={styles.campaignInfoSection}>
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Tên chiến dịch:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_name')}</Text>
                                             <Text style={styles.detailValue} numberOfLines={2} ellipsizeMode="tail">
                                                 {campaignDetail.campaignName || 'N/A'}
                                             </Text>
@@ -364,105 +362,59 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
 
                                         {campaignDetail.description && (
                                             <View style={styles.detailRowLong}>
-                                                <Text style={styles.detailLabel}>Mô tả:</Text>
+                                                <Text style={styles.detailLabel}>{t('batch_campaign_description')}</Text>
                                                 <Text style={styles.detailValueLong} numberOfLines={3} ellipsizeMode="tail">
                                                     {campaignDetail.description}
                                                 </Text>
                                             </View>
                                         )}
 
-                                        {campaignDetail.jobDescription && (
-                                            <View style={styles.detailRowLong}>
-                                                <Text style={styles.detailLabel}>Mô tả công việc:</Text>
-                                                <Text style={styles.detailValueLong} numberOfLines={3} ellipsizeMode="tail">
-                                                    {campaignDetail.jobDescription}
-                                                </Text>
-                                            </View>
-                                        )}
-
-                                        {campaignDetail.jobRequirement && (
-                                            <View style={styles.detailRowLong}>
-                                                <Text style={styles.detailLabel}>Yêu cầu công việc:</Text>
-                                                <Text style={styles.detailValueLong} numberOfLines={3} ellipsizeMode="tail">
-                                                    {campaignDetail.jobRequirement}
-                                                </Text>
-                                            </View>
-                                        )}
-
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Chỉ tiêu:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_target')}</Text>
                                             <Text style={styles.detailValue}>{campaignDetail.targetQuantity || 0}</Text>
                                         </View>
 
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Loại chiến dịch:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_type')}</Text>
                                             <Text style={styles.detailValue}>{campaignDetail.campaignType || 'N/A'}</Text>
                                         </View>
 
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Trạng thái:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_status')}</Text>
                                             <Text style={[styles.detailValue, { color: getStatusColor(mapStatusFromAPI(campaignDetail.status)) }]}>
-                                                {mapStatusFromAPI(campaignDetail.status)}
+                                                {getStatusText(mapStatusFromAPI(campaignDetail.status))}
                                             </Text>
                                         </View>
 
                                         {campaignDetail.partnerName && (
                                             <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Đối tác:</Text>
+                                                <Text style={styles.detailLabel}>{t('batch_campaign_partner')}</Text>
                                                 <Text style={styles.detailValue}>{campaignDetail.partnerName}</Text>
                                             </View>
                                         )}
 
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Ngày bắt đầu:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_start_date')}</Text>
                                             <Text style={styles.detailValue}>{formatDate(campaignDetail.startDate) || 'N/A'}</Text>
                                         </View>
 
                                         <View style={styles.detailRow}>
-                                            <Text style={styles.detailLabel}>Ngày kết thúc:</Text>
+                                            <Text style={styles.detailLabel}>{t('batch_campaign_end_date')}</Text>
                                             <Text style={styles.detailValue}>{formatDate(campaignDetail.endDate) || 'N/A'}</Text>
                                         </View>
 
-                                        {campaignDetail.approvedAt && (
-                                            <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Ngày duyệt:</Text>
-                                                <Text style={styles.detailValue}>{formatDate(campaignDetail.approvedAt)}</Text>
-                                            </View>
-                                        )}
-
-                                        {campaignDetail.rejectedAt && (
-                                            <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Ngày từ chối:</Text>
-                                                <Text style={styles.detailValue}>{formatDate(campaignDetail.rejectedAt)}</Text>
-                                            </View>
-                                        )}
-
-                                        {campaignDetail.reviewedBy && (
-                                            <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Người duyệt:</Text>
-                                                <Text style={styles.detailValue}>{campaignDetail.reviewedBy}</Text>
-                                            </View>
-                                        )}
-
                                         {campaignDetail.rejectedReason && (
                                             <View style={styles.detailRowLong}>
-                                                <Text style={styles.detailLabel}>Lý do từ chối:</Text>
+                                                <Text style={styles.detailLabel}>{t('batch_campaign_rejected_reason')}</Text>
                                                 <Text style={styles.detailValueLong} numberOfLines={2} ellipsizeMode="tail">
                                                     {campaignDetail.rejectedReason}
                                                 </Text>
                                             </View>
                                         )}
 
-                                        {campaignDetail.rejectedCount !== undefined && campaignDetail.rejectedCount !== null && (
-                                            <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Số lần từ chối:</Text>
-                                                <Text style={styles.detailValue}>{campaignDetail.rejectedCount}</Text>
-                                            </View>
-                                        )}
-
                                         {campaignDetail.createdAt && (
                                             <View style={styles.detailRow}>
-                                                <Text style={styles.detailLabel}>Ngày tạo:</Text>
+                                                <Text style={styles.detailLabel}>{t('batch_campaign_created_at')}</Text>
                                                 <Text style={styles.detailValue}>{formatDate(campaignDetail.createdAt)}</Text>
                                             </View>
                                         )}
@@ -473,7 +425,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                         ListEmptyComponent={
                             batches.length === 0 && campaignDetail ? (
                                 <View style={styles.emptyContainer}>
-                                    <Text style={styles.emptyText}>Không có đợt tuyển dụng nào</Text>
+                                    <Text style={styles.emptyText}>{t('batch_empty')}</Text>
                                 </View>
                             ) : null
                         }
