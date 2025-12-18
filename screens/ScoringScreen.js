@@ -24,6 +24,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const [remainingSeconds, setRemainingSeconds] = useState(15 * 60); // 15 phút
 
     // Debug info
     useEffect(() => {
@@ -34,6 +35,40 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     useEffect(() => {
         fetchScoringCriterias();
     }, []);
+
+    // Đếm ngược 15 phút sau khi tải xong tiêu chí và không có lỗi
+    useEffect(() => {
+        // Nếu vẫn đang loading hoặc có lỗi thì không chạy timer
+        if (loading || error) {
+            return;
+        }
+
+        // Reset lại timer mỗi lần load thành công
+        setRemainingSeconds(15 * 60);
+
+        const intervalId = setInterval(() => {
+            setRemainingSeconds(prev => {
+                if (prev <= 1) {
+                    clearInterval(intervalId);
+                    // Hết thời gian
+                    Alert.alert('Hết thời gian', 'Thời gian chấm điểm đã kết thúc.');
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        // Dọn dẹp interval khi unmount hoặc khi loading/error thay đổi
+        return () => clearInterval(intervalId);
+    }, [loading, error]);
+
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const mm = mins.toString().padStart(2, '0');
+        const ss = secs.toString().padStart(2, '0');
+        return `${mm}:${ss}`;
+    };
 
     const fetchScoringCriterias = async () => {
         try {
@@ -81,6 +116,8 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     // Không cần toggle mở rộng nữa
 
     const setCriterionStatus = (category, criterionId, status) => {
+        // Không cho chỉnh nếu đã hết thời gian
+        if (remainingSeconds <= 0) return;
         const key = keyOf(category, criterionId);
         setSelectedCriteria(prev => ({
             ...prev,
@@ -135,7 +172,7 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
     };
 
     const canSubmit = () => {
-        return !submitting && getTotalSelectedCriteria() === getTotalCriteria();
+        return !submitting && remainingSeconds > 0 && getTotalSelectedCriteria() === getTotalCriteria();
     };
 
     const handleSubmitResult = () => {
@@ -229,9 +266,6 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                             styles.criterionText,
                             selected && styles.selectedCriterionText
                         ]}>
-                            {item.text}
-                        </Text>
-                        <Text style={styles.criterionEnglish}>
                             {item.english}
                         </Text>
                         {item.details && item.details.length > 0 && (
@@ -350,6 +384,9 @@ export default function ScoringScreen({ candidateData, onBackPress, onScoreSubmi
                     <View style={styles.userTextContainer}>
                         <Text style={styles.headerTitle}>{t('scoring_title')}</Text>
                         <Text style={styles.userName}>{candidateData?.name || t('scoring_candidate')}</Text>
+                        <Text style={styles.timerText}>
+                            {t('Time remaining')}: {formatTime(remainingSeconds)}
+                        </Text>
                     </View>
                 </View>
             </View>
@@ -463,6 +500,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#6B7280',
         fontWeight: '500',
+    },
+    timerText: {
+        marginTop: 4,
+        fontSize: 14,
+        color: AIR_RED,
+        fontWeight: '700',
     },
     progressContainer: {
         paddingHorizontal: 20,
