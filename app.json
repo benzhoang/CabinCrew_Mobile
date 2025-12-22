@@ -16,12 +16,13 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.benzhoang.cabincrew",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.benzhoang.CabinCrew"
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +31,7 @@
       "eas": {
         "projectId": "d727903d-2269-41c5-8342-2fc8e008296b"
       }
-    }
+    },
+    "owner": "benzhoang"
   }
 }
