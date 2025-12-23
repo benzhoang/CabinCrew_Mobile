@@ -293,6 +293,8 @@ const dictionaries = {
         campaign_progress: 'Hiring progress',
         campaign_people: 'people',
         campaign_label_position: 'Position:',
+        campaign_Lable_partner: 'Partner',
+        campaign_Lable_type: 'Type',
         campaign_label_start_date: 'Start date:',
         campaign_label_end_date: 'End date:',
 

@@ -44,6 +44,8 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                         name: campaign.name || campaign.campaignName || '',
                         position: campaign.position || campaign.jobPosition || '',
                         department: campaign.department || campaign.departmentName || '',
+                        partnerName: campaign.partnerName || campaign.partner?.name || '',
+                        campaignType: campaign.campaignType || campaign.type || '',
                         status: mapStatusFromAPI(campaign.status),
                         startDate: formatDate(campaign.startDate || campaign.startTime),
                         endDate: formatDate(campaign.endDate || campaign.endTime),
@@ -192,6 +194,18 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                     <Text style={styles.detailLabel}>{t('campaign_label_position')}</Text>
                     <Text style={styles.detailValue}>{item.position}</Text>
                 </View>
+                {item.partnerName ? (
+                    <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>{t('Partner') || 'Partner'}</Text>
+                        <Text style={styles.detailValue}>{item.partnerName}</Text>
+                    </View>
+                ) : null}
+                {item.campaignType ? (
+                    <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>{t('Type') || 'Campaign Type'}</Text>
+                        <Text style={styles.detailValue}>{item.campaignType}</Text>
+                    </View>
+                ) : null}
                 <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{t('campaign_label_start_date')}</Text>
                     <Text style={styles.detailValue}>{item.startDate || 'N/A'}</Text>
