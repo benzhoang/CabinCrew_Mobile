@@ -7,6 +7,7 @@ import {
     FlatList,
     Image,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { useTranslation } from '../i18n';
 import { getCampaignRoundDetail, getRoundParticipants } from '../service/api';
@@ -117,6 +118,8 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                     roundName: item.roundName || 'Appearance',
                     userId: item.userId || null,
                     activityId: item.activityId || null,
+                    applicationId: item.applicationId || item.applicationID || item.application?.applicationId || null,
+                    hasAppearanceEvaluated: item.hasAppearanceEvaluated ?? false,
                 }));
 
                 setCandidates(mappedCandidates);
@@ -182,10 +185,39 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
     };
 
     const handleCandidatePress = (candidate) => {
-        // Chuyển đến màn hình chấm điểm
+        // Không cho vào chấm nếu đã chấm Appearance
+        if (candidate?.hasAppearanceEvaluated) {
+            Alert.alert(
+                t('Already scored'),
+                t('The candidate has already been scored')
+            );
+            return;
+        }
+
         if (navigation) {
             navigation.navigate('ScoringScreen', { candidateData: candidate });
         }
+    };
+
+    const handleViewApplicationPress = (candidate) => {
+        // Dùng activityId để mở hồ sơ ứng viên
+        if (!candidate?.activityId) {
+            Alert.alert(
+                t('View Application') || 'View Application',
+                t('No candidates profile was found.') || 'Missing application'
+            );
+            return;
+        }
+
+        if (navigation?.navigate) {
+            navigation.navigate('ApplicationScreen', { candidateData: candidate });
+            return;
+        }
+
+        Alert.alert(
+            t('View Application title') || 'View Application',
+            t('View Application message') || 'Đang mở hồ sơ ứng viên.'
+        );
     };
 
     const renderCandidateCard = ({ item }) => (
@@ -230,14 +262,22 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                 )}
             </View>
 
-            {item.status && item.status.toLowerCase() === 'pending' && (
+            {item.status && (
                 <View style={styles.actionButtons}>
                     <TouchableOpacity
-                        style={[styles.actionButton, styles.detailButton]}
-                        onPress={() => handleCandidatePress(item)}
+                        style={[styles.actionButton, styles.viewButton]}
+                        onPress={() => handleViewApplicationPress(item)}
                     >
-                        <Text style={styles.detailButtonText}>{t('candidate_score_appearance')}</Text>
+                        <Text style={styles.viewButtonText}>{t('View Application') || 'View Application'}</Text>
                     </TouchableOpacity>
+                    {!item.hasAppearanceEvaluated && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.detailButton]}
+                            onPress={() => handleCandidatePress(item)}
+                        >
+                            <Text style={styles.detailButtonText}>{t('Score Appearance') || 'Score Appearance'}</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             )}
         </TouchableOpacity>
@@ -541,6 +581,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 12,
         alignItems: 'center',
+    },
+    viewButton: {
+        backgroundColor: '#F1F5F9',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+    },
+    viewButtonText: {
+        color: AIR_DARK,
+        fontSize: 14,
+        fontWeight: '600',
     },
     detailButton: {
         backgroundColor: AIR_BLUE,

@@ -220,10 +220,9 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
         >
             <View style={styles.batchHeader}>
                 <Text style={styles.batchTitle}>{item.name}</Text>
-            </View>
-
-            <View style={[styles.batchStatusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-                <Text style={styles.batchStatusText}>{getStatusText(item.status)}</Text>
+                <View style={[styles.batchStatusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+                    <Text style={styles.batchStatusText}>{getStatusText(item.status)}</Text>
+                </View>
             </View>
 
             <View style={styles.batchDetails}>
@@ -265,7 +264,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                 )}
             </View>
 
-            <View style={styles.batchProgressSection}>
+            {/* <View style={styles.batchProgressSection}>
                 <Text style={styles.batchProgressTitle}>{t('batch_progress_title')}</Text>
                 <View style={styles.batchProgressContainer}>
                     <View style={styles.batchProgressBar}>
@@ -278,7 +277,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                     </View>
                     <Text style={styles.batchProgressText}>{getProgressPercentage(item.currentHires, item.targetHires)}%</Text>
                 </View>
-            </View>
+            </View> */}
 
             <TouchableOpacity
                 style={[
@@ -308,9 +307,9 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                     </TouchableOpacity>
                     <View style={styles.userTextContainer}>
                         <Text style={styles.headerTitle}>{t('batch_header_title')}</Text>
-                        <Text style={styles.userName}>
+                        {/* <Text style={styles.userName}>
                             {campaignDetail?.campaignName || campaignData?.name || t('batch_campaign_fallback')}
-                        </Text>
+                        </Text> */}
                     </View>
                 </View>
             </View>
@@ -530,7 +529,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 15,
-        marginBottom: 16,
+        marginLeft: 8,
     },
     batchStatusText: {
         color: 'white',

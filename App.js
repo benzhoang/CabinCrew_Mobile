@@ -7,6 +7,7 @@ import Home from './components/Home';
 import BatchScreen from './screens/BatchScreen';
 import CandidateListScreen from './screens/CandidateListScreen';
 import ScoringScreen from './screens/ScoringScreen';
+import ApplicationScreen from './screens/ApplicationScreen';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('main');
@@ -58,6 +59,15 @@ export default function App() {
     setCurrentScreen('scoring');
   };
 
+  const handleNavigateToApplication = (data) => {
+    setCandidateData(data);
+    setCurrentScreen('application');
+  };
+
+  const handleBackFromApplication = () => {
+    setCurrentScreen('candidateList');
+  };
+
   const handleBackFromScoring = () => {
     setCurrentScreen('candidateList');
   };
@@ -66,8 +76,8 @@ export default function App() {
     console.log('Score submitted:', { candidate, decision, criteria });
     // Ở đây có thể thêm logic lưu điểm số vào database
     Alert.alert(
-      'Thành công',
-      'Đã gửi kết quả',
+      'Successfully',
+      'Score submitted successfully',
       [{ text: 'OK', onPress: () => setCurrentScreen('candidateList') }]
     );
   };
@@ -81,6 +91,8 @@ export default function App() {
         handleNavigateToCandidateList(params.batchData);
       } else if (screen === 'ScoringScreen') {
         handleNavigateToScoring(params.candidateData);
+      } else if (screen === 'ApplicationScreen') {
+        handleNavigateToApplication(params.candidateData);
       }
     }
   };
@@ -110,6 +122,11 @@ export default function App() {
           batchData={batchData}
           onBackPress={handleBackFromCandidateList}
           navigation={navigation}
+        />
+      ) : currentScreen === 'application' ? (
+        <ApplicationScreen
+          candidateData={candidateData}
+          onBackPress={handleBackFromApplication}
         />
       ) : currentScreen === 'scoring' ? (
         <ScoringScreen

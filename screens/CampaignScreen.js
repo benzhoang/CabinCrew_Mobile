@@ -98,7 +98,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
     };
 
     const statusFilters = [
-        { key: 'active', label: t('campaign_status_active'), color: '#059669' },
+        { key: 'active', label: t('campaign_status_ongoing') || 'Ongoing', color: '#059669' },
         { key: 'completed', label: t('campaign_status_completed'), color: '#3B82F6' },
         { key: 'paused', label: t('campaign_status_paused'), color: '#D97706' },
     ];
@@ -119,7 +119,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
     const getStatusText = (status) => {
         switch (status) {
             case 'active':
-                return t('campaign_status_active');
+                return t('campaign_status_ongoing') || 'Ongoing';
             case 'completed':
                 return t('campaign_status_completed');
             case 'paused':
@@ -172,7 +172,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
             <Text style={styles.companyName}>{item.department}</Text>
 
             {/* Progress Bar */}
-            <View style={styles.progressContainer}>
+            {/* <View style={styles.progressContainer}>
                 <View style={styles.progressHeader}>
                     <Text style={styles.progressLabel}>{t('campaign_progress')}</Text>
                     <Text style={styles.progressPercentage}>{getProgressPercentage(item.currentHires, item.targetHires)}%</Text>
@@ -185,7 +185,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                         ]}
                     />
                 </View>
-            </View>
+            </View> */}
 
             <View style={styles.campaignDetails}>
                 <View style={styles.detailRow}>

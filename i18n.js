@@ -257,9 +257,10 @@ const dictionaries = {
         // Campaign Screen
         campaigns: 'Campaigns',
         all_campaigns: 'All',
-        active_campaigns: 'Active',
+        active_campaigns: 'Ongoing',
         warning_campaigns: 'Warning',
         inactive_campaigns: 'Inactive',
+        campaign_status_ongoing: 'Ongoing',
 
         // Task Screen
         task_assigned: 'Assigned',
@@ -287,8 +288,8 @@ const dictionaries = {
         campaign_retry: 'Retry',
         campaign_empty: 'No campaigns available',
         campaign_status_active: 'Active',
-        campaign_status_completed: 'Completed',
-        campaign_status_paused: 'Paused',
+        campaign_status_completed: 'Upcoming',
+        campaign_status_paused: 'Ended',
         campaign_progress: 'Hiring progress',
         campaign_people: 'people',
         campaign_label_position: 'Position:',
@@ -297,7 +298,7 @@ const dictionaries = {
 
         // Candidate List Screen
         candidate_list_title: 'Candidate List',
-        candidate_batch_name: 'Recruitment Batch',
+        candidate_batch_name: 'Recruitment Campaign',
         candidate_loading: 'Loading candidates...',
         candidate_error: 'Unable to load candidates',
         candidate_error_round: 'Error loading recruitment batch information',
@@ -340,7 +341,7 @@ const dictionaries = {
         scoring_info_title: 'Notification',
 
         // Batch Screen
-        batch_header_title: 'Recruitment Batch',
+        batch_header_title: 'Recruitment Campaign',
         batch_campaign_fallback: 'Campaign',
         batch_loading: 'Loading batch information...',
         batch_error: 'Unable to load campaign information',
@@ -366,7 +367,7 @@ const dictionaries = {
         batch_not_available: 'Not available yet',
         batch_empty: 'No batches available',
         batch_campaign_info: 'Campaign information',
-        batch_campaign_name: 'Campaign name:',
+        batch_campaign_name: 'Name:',
         batch_campaign_description: 'Description:',
         batch_campaign_target: 'Target:',
         batch_campaign_type: 'Campaign type:',

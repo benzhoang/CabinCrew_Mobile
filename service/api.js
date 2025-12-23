@@ -572,6 +572,89 @@ export const getRoundParticipants = async (roundId) => {
     }
 };
 
+// API lấy thông tin hồ sơ ứng tuyển theo applicationId
+export const getApplicationById = async (applicationId) => {
+    try {
+        if (!applicationId) {
+            return {
+                success: false,
+                error: 'Application ID is required',
+            };
+        }
+
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const url = `${API_BASE_URL}/applications/${applicationId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch (e) {
+                errorData = { message: errorText || `HTTP ${response.status}` };
+            }
+            return {
+                success: false,
+                error: errorData.errorMessage || errorData.message || `HTTP ${response.status}: Không thể lấy thông tin hồ sơ`,
+                errorCode: errorData.errorCode || response.status,
+            };
+        }
+
+        const data = await response.json();
+
+        if (data.code === 0 && data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        }
+
+        if (data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        }
+
+        if (data.applicationId) {
+            return {
+                success: true,
+                data,
+                message: data.message || 'Success',
+            };
+        }
+
+        return {
+            success: false,
+            error: data.errorMessage || data.message || 'Không thể lấy thông tin hồ sơ',
+        };
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            'Lỗi khi tải thông tin hồ sơ';
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+
 
 // API gửi kết quả chấm điểm Appearance
 export const submitAppearanceResult = async ({ activityId, comment, choices }) => {
