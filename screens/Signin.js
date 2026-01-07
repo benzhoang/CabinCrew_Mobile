@@ -150,8 +150,8 @@ export default function Signin({ onBackPress, onSignInSuccess, currentLang = 'vi
 
                 setIsLoading(false);
                 Alert.alert(
-                    currentLang === 'vi' ? 'Thành công' : 'Success',
-                    currentLang === 'vi' ? 'Đăng nhập thành công!' : 'Sign in successful!',
+                    currentLang === 'en' ? 'Thành công' : 'Success',
+                    currentLang === 'en' ? 'Đăng nhập thành công!' : 'Sign in successful!',
                     [{ text: 'OK', onPress: onSignInSuccess }]
                 );
             } else {
