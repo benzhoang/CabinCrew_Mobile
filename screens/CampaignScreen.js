@@ -93,7 +93,7 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
         } catch (e) {
             return dateString;
         }
@@ -165,13 +165,9 @@ export default function CampaignScreen({ onSignOutPress, onBackPress, navigation
                         {getStatusText(item.status)}
                     </Text>
                 </View>
-                <Text style={styles.applicantCount}>
-                    {item.currentHires || 0}/{item.targetHires || 0} {t('campaign_people')}
-                </Text>
             </View>
 
             <Text style={styles.campaignTitle}>{item.name}</Text>
-            <Text style={styles.companyName}>{item.department}</Text>
 
             {/* Progress Bar */}
             {/* <View style={styles.progressContainer}>
@@ -449,7 +445,7 @@ const styles = StyleSheet.create({
     },
     cardHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         marginBottom: 12,
     },
@@ -478,7 +474,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '800',
         color: AIR_DARK,
-        marginBottom: 6,
+        marginBottom: 12,
         lineHeight: 24,
     },
     companyName: {
@@ -489,6 +485,7 @@ const styles = StyleSheet.create({
     },
     campaignDetails: {
         gap: 12,
+        marginTop: 0,
     },
     detailRow: {
         flexDirection: 'row',

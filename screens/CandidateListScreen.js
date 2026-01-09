@@ -135,6 +135,19 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
         }
     };
 
+    // Format date từ API (dd/mm/yyyy)
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            return dateString;
+        }
+    };
 
     const getStatusColor = (status) => {
         if (!status) return '#6B7280';
@@ -149,7 +162,7 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
             case 'passed':
                 return '#059669'; // Xanh lá - Đã đạt
             case 'ongoing':
-                return '#0EA5E9'; // Xanh dương - Đang diễn ra
+                return '#D97706'; // Vàng - Đang diễn ra
             case 'failed':
                 return '#DC2626'; // Đỏ - Không đạt
             default:
@@ -268,14 +281,14 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                         style={[styles.actionButton, styles.viewButton]}
                         onPress={() => handleViewApplicationPress(item)}
                     >
-                        <Text style={styles.viewButtonText}>{t('View Application') || 'View Application'}</Text>
+                        <Text style={styles.viewButtonText} numberOfLines={2}>{t('View Application') || 'View Application'}</Text>
                     </TouchableOpacity>
                     {!item.hasAppearanceEvaluated && (
                         <TouchableOpacity
                             style={[styles.actionButton, styles.detailButton]}
                             onPress={() => handleCandidatePress(item)}
                         >
-                            <Text style={styles.detailButtonText}>{t('Score Appearance') || 'Score Appearance'}</Text>
+                            <Text style={styles.detailButtonText} numberOfLines={2}>{t('Score Appearance') || 'Score Appearance'}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -574,6 +587,7 @@ const styles = StyleSheet.create({
     actionButtons: {
         flexDirection: 'row',
         gap: 12,
+        alignItems: 'stretch',
     },
     actionButton: {
         flex: 1,
@@ -581,6 +595,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 12,
         alignItems: 'center',
+        justifyContent: 'center',
+        height: 56, // cố định chiều cao 2 nút để chữ nằm cùng một hàng
     },
     viewButton: {
         backgroundColor: '#F1F5F9',
@@ -589,15 +605,17 @@ const styles = StyleSheet.create({
     },
     viewButtonText: {
         color: AIR_DARK,
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '600',
+        textAlign: 'center',
     },
     detailButton: {
         backgroundColor: AIR_BLUE,
     },
     detailButtonText: {
         color: 'white',
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '600',
+        textAlign: 'center',
     },
 });

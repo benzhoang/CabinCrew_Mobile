@@ -254,7 +254,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
                 )}
                 <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{t('batch_target')}</Text>
-                    <Text style={styles.detailValue}>{item.currentHires}/{item.targetHires}</Text>
+                    <Text style={styles.detailValue}>{item.currentHires}/{item.targetHires} applicants</Text>
                 </View>
                 {item.notes && (
                     <View style={styles.detailRow}>
@@ -370,7 +370,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
 
                                         <View style={styles.detailRow}>
                                             <Text style={styles.detailLabel}>{t('batch_campaign_target')}</Text>
-                                            <Text style={styles.detailValue}>{campaignDetail.targetQuantity || 0}</Text>
+                                            <Text style={styles.detailValue}>{campaignDetail.targetQuantity || 0} applicants</Text>
                                         </View>
 
                                         <View style={styles.detailRow}>
