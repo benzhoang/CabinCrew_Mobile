@@ -233,6 +233,30 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
         );
     };
 
+    const handleViewResultPress = (candidate) => {
+        // Mở màn hình xem kết quả chấm điểm
+        if (!candidate?.activityId) {
+            Alert.alert(
+                t('View Result') || 'View Result',
+                t('No result found.') || 'Không tìm thấy kết quả.'
+            );
+            return;
+        }
+
+        if (navigation?.navigate) {
+            // Navigate đến ResultScreen để xem kết quả chấm điểm
+            navigation.navigate('ResultScreen', {
+                candidateData: candidate,
+            });
+            return;
+        }
+
+        Alert.alert(
+            t('View Result') || 'View Result',
+            t('View Result message') || 'Đang mở kết quả chấm điểm.'
+        );
+    };
+
     const renderCandidateCard = ({ item }) => (
         <TouchableOpacity
             style={styles.candidateCard}
@@ -283,12 +307,19 @@ export default function CandidateListScreen({ batchData, onBackPress, navigation
                     >
                         <Text style={styles.viewButtonText} numberOfLines={2}>{t('View Application') || 'View Application'}</Text>
                     </TouchableOpacity>
-                    {!item.hasAppearanceEvaluated && (
+                    {!item.hasAppearanceEvaluated ? (
                         <TouchableOpacity
                             style={[styles.actionButton, styles.detailButton]}
                             onPress={() => handleCandidatePress(item)}
                         >
                             <Text style={styles.detailButtonText} numberOfLines={2}>{t('Score Appearance') || 'Score Appearance'}</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.resultButton]}
+                            onPress={() => handleViewResultPress(item)}
+                        >
+                            <Text style={styles.resultButtonText} numberOfLines={2}>{t('View Result') || 'View Result'}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -613,6 +644,15 @@ const styles = StyleSheet.create({
         backgroundColor: AIR_BLUE,
     },
     detailButtonText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    resultButton: {
+        backgroundColor: AIR_GREEN,
+    },
+    resultButtonText: {
         color: 'white',
         fontSize: 12,
         fontWeight: '600',

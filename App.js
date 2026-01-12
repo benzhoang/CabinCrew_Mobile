@@ -8,6 +8,7 @@ import BatchScreen from './screens/BatchScreen';
 import CandidateListScreen from './screens/CandidateListScreen';
 import ScoringScreen from './screens/ScoringScreen';
 import ApplicationScreen from './screens/ApplicationScreen';
+import ResultScreen from './screens/ResultScreen';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('main');
@@ -64,11 +65,20 @@ export default function App() {
     setCurrentScreen('application');
   };
 
+  const handleNavigateToResult = (data) => {
+    setCandidateData(data);
+    setCurrentScreen('result');
+  };
+
   const handleBackFromApplication = () => {
     setCurrentScreen('candidateList');
   };
 
   const handleBackFromScoring = () => {
+    setCurrentScreen('candidateList');
+  };
+
+  const handleBackFromResult = () => {
     setCurrentScreen('candidateList');
   };
 
@@ -93,6 +103,21 @@ export default function App() {
         handleNavigateToScoring(params.candidateData);
       } else if (screen === 'ApplicationScreen') {
         handleNavigateToApplication(params.candidateData);
+      } else if (screen === 'ResultScreen') {
+        handleNavigateToResult(params.candidateData);
+      }
+    },
+    goBack: () => {
+      if (currentScreen === 'result') {
+        handleBackFromResult();
+      } else if (currentScreen === 'application') {
+        handleBackFromApplication();
+      } else if (currentScreen === 'scoring') {
+        handleBackFromScoring();
+      } else if (currentScreen === 'candidateList') {
+        handleBackFromCandidateList();
+      } else if (currentScreen === 'batch') {
+        handleBackFromBatch();
       }
     }
   };
@@ -133,6 +158,11 @@ export default function App() {
           candidateData={candidateData}
           onBackPress={handleBackFromScoring}
           onScoreSubmit={handleScoreSubmit}
+        />
+      ) : currentScreen === 'result' ? (
+        <ResultScreen
+          route={{ params: { candidateData } }}
+          navigation={navigation}
         />
       ) : (
         <Home

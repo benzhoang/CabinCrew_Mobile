@@ -715,3 +715,95 @@ export const submitAppearanceResult = async ({ activityId, comment, choices }) =
     }
 };
 
+// API lấy kết quả chấm điểm Appearance theo activityId
+export const getAppearanceResult = async (activityId) => {
+    try {
+        if (!activityId) {
+            return {
+                success: false,
+                error: 'Activity ID is required',
+            };
+        }
+
+        const token = await getToken();
+        if (!token) {
+            return {
+                success: false,
+                error: 'Không tìm thấy token đăng nhập',
+            };
+        }
+
+        const url = `${API_BASE_URL}/appearance-results/${activityId}`;
+        console.log('API - getAppearanceResult: Calling URL:', url);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        console.log('API - getAppearanceResult: Response status:', response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch (e) {
+                errorData = { message: errorText || `HTTP ${response.status}` };
+            }
+            return {
+                success: false,
+                error: errorData.errorMessage || errorData.message || `HTTP ${response.status}: Không thể lấy kết quả chấm điểm`,
+                errorCode: errorData.errorCode || response.status,
+            };
+        }
+
+        const data = await response.json();
+        console.log('API - getAppearanceResult: Response data:', JSON.stringify(data, null, 2));
+
+        // Kiểm tra code === 0 (success) theo format API
+        if (data.code === 0 && data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        }
+
+        // Trường hợp không có code field nhưng có data
+        if (data.data) {
+            return {
+                success: true,
+                data: data.data,
+                message: data.message,
+            };
+        }
+
+        // Trường hợp có evaluationId hoặc các field khác của result
+        if (data.evaluationId !== undefined || data.appearanceResults) {
+            return {
+                success: true,
+                data: data,
+                message: data.message || 'Success',
+            };
+        }
+
+        return {
+            success: false,
+            error: data.errorMessage || data.message || 'Không thể lấy kết quả chấm điểm',
+        };
+    } catch (error) {
+        const errorMessage =
+            error.message ||
+            'Lỗi khi tải kết quả chấm điểm';
+        console.error('API - getAppearanceResult: Exception caught:', error);
+        return {
+            success: false,
+            error: errorMessage,
+        };
+    }
+};
+
