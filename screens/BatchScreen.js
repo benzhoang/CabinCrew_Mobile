@@ -148,7 +148,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             case 'upcoming':
                 return t('batch_status_upcoming');
             case 'completed':
-                return t('batch_status_completed');
+                return 'Ended';
             case 'paused':
                 return t('batch_status_paused');
             default:
@@ -178,7 +178,7 @@ export default function BatchScreen({ campaignData, onBackPress, navigation }) {
             case 'upcoming':
                 return '#D97706';
             case 'completed':
-                return '#3B82F6';
+                return '#DC2626';
             case 'paused':
                 return '#DC2626';
             default:
